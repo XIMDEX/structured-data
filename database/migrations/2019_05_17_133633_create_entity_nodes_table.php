@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateNodeEntitiesTable extends Migration
+class CreateEntityNodesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateNodeEntitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}node_entities", function (Blueprint $table) {
+        Schema::create("{$this->baseName}entity_nodes", function (Blueprint $table) {
             
             // Fields
             $table->unsignedBigInteger('node_id');
@@ -40,6 +40,6 @@ class CreateNodeEntitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}node_entities");
+        Schema::dropIfExists("{$this->baseName}entity_nodes");
     }
 }

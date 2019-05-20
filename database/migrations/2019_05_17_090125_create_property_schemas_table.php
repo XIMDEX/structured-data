@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateSchemaPropertiesTable extends Migration
+class CreatePropertySchemasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateSchemaPropertiesTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}schema_properties", function (Blueprint $table) {
+        Schema::create("{$this->baseName}property_schemas", function (Blueprint $table) {
             
             // Fields
             $table->bigIncrements('id');
@@ -21,6 +21,8 @@ class CreateSchemaPropertiesTable extends Migration
             $table->unsignedBigInteger('property_id');
             $table->unsignedSmallInteger('min_cardinality')->default(0);
             $table->unsignedSmallInteger('max_cardinality')->nullable()->default(null);
+            $table->unsignedTinyInteger('order')->default(0);
+            $table->text('default_value')->nullable();
             $table->timestamps();
             
             // Relations
@@ -40,6 +42,6 @@ class CreateSchemaPropertiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}schema_properties");
+        Schema::dropIfExists("{$this->baseName}property_schemas");
     }
 }

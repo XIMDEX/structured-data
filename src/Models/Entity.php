@@ -11,6 +11,11 @@ class Entity extends Model
     {
         return $this->belongsTo(Schema::class);
     }
+   
+    public function nodes()
+    {
+        return $this->belongsToMany(Node::class, (new EntityNode)->getTable());
+    }
     
     public function values()
     {

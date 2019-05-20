@@ -18,7 +18,7 @@ class CreateAvailableTypesTable extends Migration
             
             // Fields
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('schema_property_id');
+            $table->unsignedBigInteger('property_schema_id');
             $table->unsignedBigInteger('schema_id')->nullable();
             $table->enum('type', Property::SIMPLE_TYPES)->nullable();
             $table->timestamps();
@@ -27,8 +27,8 @@ class CreateAvailableTypesTable extends Migration
             $table->foreign('schema_id')
                 ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('schema_property_id')
-                ->references('id')->on("{$this->baseName}schema_properties")
+            $table->foreign('property_schema_id')
+                ->references('id')->on("{$this->baseName}property_schemas")
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }
