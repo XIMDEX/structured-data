@@ -3,8 +3,7 @@
 return [
     'routes' => [
         'load-entity' => 'load-entity',
-        'load-entities' => 'load-entities',
-        'ping' => 'ping'
+        'load-node' => 'load-node'
     ],
     'middleware' => [
         'base' => 'api',
