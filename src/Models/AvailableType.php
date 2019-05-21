@@ -10,4 +10,9 @@ class AvailableType extends Model
     {
         return $this->belongsTo(Schema::class);
     }
+    
+    public function propertySchema()
+    {
+        return $this->belongsTo(PropertySchema::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace Ximdex\StructuredData\src\Models;
 
 use Ximdex\StructuredData\Core\Model;
+use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Entity;
 
 class Value extends Model
@@ -14,6 +15,11 @@ class Value extends Model
     
     public function referenceEntity()
     {
-        return $this->belongsTo(Entity::class);
+        return $this->belongsTo(Entity::class, 'ref_entity_id');
+    }
+    
+    public function availableType()
+    {
+        return $this->belongsTo(AvailableType::class);
     }
 }

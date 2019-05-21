@@ -31,5 +31,10 @@ Route::group([
         Route::get(config('structureddata.api.routes.load-node') . '/{reference}', [
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\NodeController@load']);
+        
+        // Load the nodes for an entity
+        Route::get(config('structureddata.api.routes.load-entity-nodes') . '/{reference}', [
+            'as' => 'load-node',
+            'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
     });
 });
