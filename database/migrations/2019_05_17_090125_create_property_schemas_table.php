@@ -21,7 +21,7 @@ class CreatePropertySchemasTable extends Migration
             $table->unsignedBigInteger('property_id');
             $table->unsignedSmallInteger('min_cardinality')->default(0);
             $table->unsignedSmallInteger('max_cardinality')->nullable()->default(null);
-            $table->unsignedTinyInteger('order')->default(0);
+            $table->unsignedTinyInteger('order')->default(1);
             $table->text('default_value')->nullable();
             $table->timestamps();
             
