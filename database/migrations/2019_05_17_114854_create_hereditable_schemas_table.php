@@ -22,7 +22,7 @@ class CreateHereditableSchemasTable extends Migration
             $table->timestamps();
             
             // Indexes
-            $table->primary('schema_id', 'parent_schema_id');
+            $table->primary(['schema_id', 'parent_schema_id']);
             
             $table->foreign('schema_id')
                 ->references('id')->on("{$this->baseName}schemas")

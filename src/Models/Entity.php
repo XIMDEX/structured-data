@@ -66,7 +66,7 @@ class Entity extends Model
             $order = $value->availableType->propertySchema->order;
             if ($value->availableType->type == Schema::THING_TYPE) {
                 if (! $value->ref_entity_id) {
-                
+                    
                     // No entity defined for this value !
                     continue;
                 }

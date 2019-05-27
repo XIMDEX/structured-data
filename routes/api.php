@@ -36,5 +36,15 @@ Route::group([
         Route::get(config('structureddata.api.routes.load-entity-nodes') . '/{reference}', [
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
+        
+        // Load a list of schemes
+        Route::get(config('structureddata.api.routes.load-schema') . '/{schema}', [
+            'as' => 'load-schema',
+            'uses' => config('structureddata.controllersNamespace') . '\SchemaController@load']);
+        
+        // Load a list of schemes
+        Route::get(config('structureddata.api.routes.schemas'), [
+            'as' => 'schemas',
+            'uses' => config('structureddata.controllersNamespace') . '\SchemaController@list']);
     });
 });
