@@ -2,11 +2,12 @@
 
 return [
     'routes' => [
-        'load-entity' => 'load-entity',
-        'load-entity-nodes' => 'load-entity-nodes',
-        'load-node' => 'load-node',
+        'load-entity' => 'entity',
+        'load-entity-nodes' => 'entity-nodes',
+        'load-node' => 'node',
         'load-schema' => 'schema',
-        'schemas' => 'schemas'
+        'load-schemas' => 'schemas',
+        'available-types' => 'property-available-types'
     ],
     'middleware' => [
         'base' => 'api',

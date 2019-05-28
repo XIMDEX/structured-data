@@ -10,7 +10,7 @@ class PropertySchema extends Model
     
     public $appends = ['name'];
     
-    public function getNameAttribute()
+    public function getNameAttribute() : string
     {
         return $this->property->name;
     }

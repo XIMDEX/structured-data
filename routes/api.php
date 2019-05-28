@@ -46,5 +46,10 @@ Route::group([
         Route::get(config('structureddata.api.routes.schemas'), [
             'as' => 'schemas',
             'uses' => config('structureddata.controllersNamespace') . '\SchemaController@list']);
+        
+        // Available types from a schema property
+        Route::get(config('structureddata.api.routes.available-types') . '/{propSchema}', [
+            'as' => 'schemas',
+            'uses' => config('structureddata.controllersNamespace') . '\PropertySchemaController@avaliableTypes']);
     });
 });
