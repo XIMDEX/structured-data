@@ -3,20 +3,41 @@
 namespace Ximdex\StructuredData\Controllers;
 
 use Ximdex\StructuredData\Models\Schema;
+use Ximdex\StructuredData\Requests\SchemaRequest;
 
 class SchemaController extends Controller
 {
-    public function load(int $id)
+    public function index()
+    {
+        $schemas = Schema::all();
+        return response()->json($schemas);
+    }
+    
+    public function show(int $id)
     {
         $schema = Schema::findOrFail($id);
-        // $schema->inheritedSchemas;
+        $schema->inheritedSchemas;
         $schema['properties'] = $schema->properties();
         return response()->json($schema);
     }
     
-    public function list()
+    public function store(SchemaRequest $request)
     {
-        $schemas = Schema::all();
-        return response()->json($schemas);
+        $schema = new Schema();
+        $schema->name = $request->input('name');
+        $schema->save();
+    }
+    
+    public function update(SchemaRequest $request, int $id)
+    {
+        $schema = Schema::findOrFail($id);
+        $schema->name = $request->input('name');
+        $schema->save();
+    }
+    
+    public function destroy(int $id)
+    {
+        $schema = Schema::findOrFail($id);
+        $schema->delete();
     }
 }

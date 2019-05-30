@@ -10,9 +10,16 @@ class Migration extends BaseMigration
     
     public function __construct()
     {
-        $this->baseName = config('structureddata.module.name', '');
-        if (! empty($this->baseName)) {
-            $this->baseName .= '_';
+        if (! $this->baseName) {
+            $this->baseName = config('structureddata.module.name', '');
+            if (! empty($this->baseName)) {
+                $this->baseName .= '_';
+            }
         }
+    }
+    
+    public function getBaseName() : string
+    {
+        return $this->baseName;
     }
 }

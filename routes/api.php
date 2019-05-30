@@ -22,6 +22,8 @@ Route::group([
         'middleware' => config('structureddata.api.middleware.auth')
     ], function () {
         
+        // ENTITIES...
+        
         // Load a single entity by ID
         Route::get(config('structureddata.api.routes.load-entity') . '/{entity}', [
             'as' => 'load-entity', 
@@ -37,19 +39,14 @@ Route::group([
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
         
-        // Load a list of schemes
-        Route::get(config('structureddata.api.routes.load-schema') . '/{schema}', [
-            'as' => 'load-schema',
-            'uses' => config('structureddata.controllersNamespace') . '\SchemaController@load']);
+        // SCHEMES...
         
-        // Load a list of schemes
-        Route::get(config('structureddata.api.routes.schemas'), [
-            'as' => 'schemas',
-            'uses' => config('structureddata.controllersNamespace') . '\SchemaController@list']);
+        // Schema manipulation
+        Route::apiResource(config('structureddata.api.routes.load-schema'), config('structureddata.controllersNamespace') . '\SchemaController');
         
         // Available types from a schema property
         Route::get(config('structureddata.api.routes.available-types') . '/{propSchema}', [
-            'as' => 'schemas',
+            'as' => 'property-types',
             'uses' => config('structureddata.controllersNamespace') . '\PropertySchemaController@avaliableTypes']);
     });
 });

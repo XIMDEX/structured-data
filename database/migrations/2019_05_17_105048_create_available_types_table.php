@@ -23,6 +23,9 @@ class CreateAvailableTypesTable extends Migration
             $table->enum('type', Property::SIMPLE_TYPES)->nullable();
             $table->timestamps();
             
+            // Indexes
+            $table->unique(['property_schema_id', 'schema_id', 'type']);
+            
             // Relations
             $table->foreign('schema_id')
                 ->references('id')->on("{$this->baseName}schemas")

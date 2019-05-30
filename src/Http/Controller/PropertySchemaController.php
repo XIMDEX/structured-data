@@ -11,4 +11,6 @@ class PropertySchemaController extends Controller
         $propSchema = PropertySchema::findOrFail($id);
         return response()->json($propSchema->availableTypes);
     }
+    
+    
 }

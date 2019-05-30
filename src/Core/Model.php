@@ -20,15 +20,20 @@ class Model extends BaseModel
      * @return string
      */
     public function getTable()
-    {   
+    {
+        if ($this->table) {
+            return $this->table;
+        }
         return self::$prefix . parent::getTable();
     }
     
     protected static function modelPrefix()
     {
-        self::$prefix = config('structureddata.module.name', '');
-        if (! empty(self::$prefix)) {
-            self::$prefix .= '_';
+        if (! self::$prefix) {
+            self::$prefix = config('structureddata.module.name', '');
+            if (! empty(self::$prefix)) {
+                self::$prefix .= '_';
+            }
         }
     }
 }
