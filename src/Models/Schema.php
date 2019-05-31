@@ -10,6 +10,8 @@ class Schema extends Model
     
     public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties'];
     
+    public $fillable = ['name', 'comment'];
+    
     /**
      * Retrieve only the properties specified for this schema
      * 

@@ -11,7 +11,8 @@ class ApiRequest extends FormRequest
         'name' => [
             'string',
             'min:3',
-            'max:255'
+            'max:255',
+            'alpha'
         ]
     ];
     
@@ -39,18 +40,14 @@ class ApiRequest extends FormRequest
             case 'POST':
             case 'PUT':
             case 'PATH':
-                $this->addRule('name', 'required');
+                // $this->addRule('name', 'required');
                 break;
         }
         return $this->validations;
     }
     
-    protected function addRule(string $key, string $rule): void
+    protected function addRule(string $key, $rule): void
     {
-        if (isset($this->validations[$key])) {
-            $this->validations[$key][] = $rule;
-        } else {
-            $this->validations[$key] = $rule;
-        }
+        $this->validations[$key][] = $rule;
     }
 }

@@ -25,6 +25,9 @@ class CreatePropertySchemasTable extends Migration
             $table->text('default_value')->nullable();
             $table->timestamps();
             
+            // Indexes
+            $table->unique(['schema_id', 'property_id']);
+            
             // Relations
             $table->foreign('schema_id')
                 ->references('id')->on("{$this->baseName}schemas")

@@ -13,9 +13,8 @@ class SchemaController extends Controller
         return response()->json($schemas);
     }
     
-    public function show(int $id)
+    public function show(Schema $schema)
     {
-        $schema = Schema::findOrFail($id);
         $schema->inheritedSchemas;
         $schema['properties'] = $schema->properties();
         return response()->json($schema);
@@ -23,21 +22,28 @@ class SchemaController extends Controller
     
     public function store(SchemaRequest $request)
     {
-        $schema = new Schema();
-        $schema->name = $request->input('name');
-        $schema->save();
+        return Schema::create($request->all());
     }
     
-    public function update(SchemaRequest $request, int $id)
+    public function update(SchemaRequest $request, Schema $schema)
     {
-        $schema = Schema::findOrFail($id);
-        $schema->name = $request->input('name');
-        $schema->save();
+        $inheritedSchemas = $request->get('inherited_schemas', false);
+        if ($inheritedSchemas !== false) {
+            $syncSchemas = [];
+            foreach ($inheritedSchemas as $data) {
+                if (isset($data['priority'])) {
+                    $syncSchemas[$data['id']] = ['priority' => (int) $data['priority']];
+                } else {
+                    $syncSchemas[] = $data['id'];
+                }
+            }
+            $schema->inheritedSchemas()->sync($syncSchemas);
+        }
+        return $schema->update($request->all());
     }
     
-    public function destroy(int $id)
+    public function destroy(Schema $schema)
     {
-        $schema = Schema::findOrFail($id);
         $schema->delete();
     }
 }

@@ -18,6 +18,7 @@ class CreateSchemasTable extends Migration
             // Fields
             $table->bigIncrements('id');
             $table->char('name', 50)->unique();
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

@@ -41,8 +41,22 @@ Route::group([
         
         // SCHEMES...
         
+        // Bind schema
+        Route::bind(config('structureddata.api.routes.schema'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\Schema')::findOrFail($id);
+        });
+        
         // Schema manipulation
-        Route::apiResource(config('structureddata.api.routes.load-schema'), config('structureddata.controllersNamespace') . '\SchemaController');
+        Route::apiResource(config('structureddata.api.routes.schema'), config('structureddata.controllersNamespace') . '\SchemaController');
+        
+        // Bind schema
+        Route::bind(config('structureddata.api.routes.property-schema'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\PropertySchema')::findOrFail($id);
+        });
+        
+        // Property schema manipulation
+        Route::apiResource(config('structureddata.api.routes.property-schema'), config('structureddata.controllersNamespace') 
+            . '\PropertySchemaController');
         
         // Available types from a schema property
         Route::get(config('structureddata.api.routes.available-types') . '/{propSchema}', [

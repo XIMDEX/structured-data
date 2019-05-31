@@ -4,6 +4,7 @@ namespace Ximdex\StructuredData\Requests;
 
 use Ximdex\StructuredData\Models\Schema;
 use Illuminate\Support\Facades\Request;
+use Ximdex\StructuredData\Rules\SchemaInheritation;
 
 class SchemaRequest extends ApiRequest
 {   
@@ -13,6 +14,11 @@ class SchemaRequest extends ApiRequest
      */
     public function rules(): array
     {
+        if ($this->schema) {
+            $id = $this->schema->id;
+        } else {
+            $id = null;
+        }
         parent::rules();
         $method = Request::method();
         switch ($method) {
@@ -20,11 +26,19 @@ class SchemaRequest extends ApiRequest
             // store | update
             case 'POST':
             case 'PUT':
-            case 'PATH':
-                $this->addRule('name', 'alpha');
+                $this->addRule('name', 'required');
+            case 'PATCH':
                 $this->addRule('name', 'max:50');
-                $this->addRule('name', 'unique:' . (new Schema)->getTable());
-                break;
+                $this->addRule('name', 'unique:' . (new Schema)->getTable() . ',name,' . $id);
+                $this->addRule('comment', 'nullable');
+                $this->addRule('inherited_schemas', 'array');
+                $this->addRule('inherited_schemas.*.id', 'Numeric');
+                $this->addRule('inherited_schemas.*.id', 'gte:1');
+                $this->addRule('inherited_schemas.*.priority', 'Numeric');
+                $this->addRule('inherited_schemas.*.priority', 'gte:1');
+                $this->addRule('*', 'bail');
+                $this->addRule('inherited_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
+                $this->addRule('inherited_schemas', new SchemaInheritation($id));
         }
         return $this->validations;
     }

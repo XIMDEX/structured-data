@@ -5,8 +5,9 @@ return [
         'load-entity' => 'entity',
         'load-entity-nodes' => 'entity-nodes',
         'load-node' => 'node',
-        'load-schema' => 'schema',
-        'available-types' => 'property-available-types'
+        'schema' => 'schema',
+        'available-types' => 'property-available-types',
+        'property-schema' => 'property-schema'
     ],
     'middleware' => [
         'base' => 'api',
