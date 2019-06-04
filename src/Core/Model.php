@@ -17,11 +17,13 @@ class Model extends BaseModel
         parent::__construct($attributes);
     }
     
-    public static function create($attributes){
+    public static function create($attributes)
+    {
         return static::query()->create($attributes);
     }
     
-    public function update(array $attributes = [], array $options = []){
+    public function update(array $attributes = [], array $options = [])
+    {
         $attributes = Arr::except($attributes, static::$except);
         parent::update($attributes, $options);
     }
@@ -49,4 +51,3 @@ class Model extends BaseModel
         }
     }
 }
-

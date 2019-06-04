@@ -7,16 +7,15 @@ use Ximdex\StructuredData\Requests\PropertySchemaRequest;
 
 class PropertySchemaController extends Controller
 {
-    public function avaliableTypes(int $id)
+    public function avaliableTypes(PropertySchema $propSchema)
     {
-        $propSchema = PropertySchema::findOrFail($id);
+        // $propSchema = PropertySchema::findOrFail($id);
         return response()->json($propSchema->availableTypes);
     }
     
     public function index()
     {
-        $propSchemas = PropertySchema::all();
-        return response()->json($propSchemas);
+        return response()->json(PropertySchema::all());
     }
     
     public function show(PropertySchema $propSchema)
@@ -27,13 +26,17 @@ class PropertySchemaController extends Controller
     
     public function store(PropertySchemaRequest $request)
     {
-        $propSchema = new PropertySchema();
-        $propSchema->save();
+        PropertySchema::create($request->all());
     }
     
     public function update(PropertySchemaRequest $request, PropertySchema $propSchema)
     {
-        $propSchema->save();
+        if ($request->input('name') and $propSchema->name != $request->input('name')) {
+            
+            // New property name was given
+            $propSchema->property_id = null;
+        }
+        $propSchema->update($request->all());
     }
     
     public function destroy(PropertySchema $propSchema)

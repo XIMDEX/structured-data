@@ -9,8 +9,7 @@ class SchemaController extends Controller
 {
     public function index()
     {
-        $schemas = Schema::all();
-        return response()->json($schemas);
+        return response()->json(Schema::all());
     }
     
     public function show(Schema $schema)
