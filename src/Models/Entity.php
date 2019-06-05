@@ -6,12 +6,14 @@ use Ximdex\StructuredData\Core\Model;
 use Ximdex\StructuredData\src\Models\Value;
 
 class Entity extends Model
-{   
+{
+    public $fillable = ['schema_id'];
+    
     protected $appends = ['schema_url'];
     
     public function getSchemaUrlAttribute(): string
     {
-        return route('linked-data.load-entity', ['entity' => $this->id]);
+        return route('linked-data.' . config('structureddata.api.routes.load-entity') . '.show', ['entity' => $this->id]);
     }
     
     public function schema()

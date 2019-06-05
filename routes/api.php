@@ -22,12 +22,17 @@ Route::group([
         'middleware' => config('structureddata.api.middleware.auth')
     ], function () {
         
-        // ENTITIES...
+        // ENTITIES ...
         
-        // Load a single entity by ID
-        Route::get(config('structureddata.api.routes.load-entity') . '/{entity}', [
-            'as' => 'load-entity', 
-            'uses' => config('structureddata.controllersNamespace') . '\EntityController@load']);
+        // Bind entity
+        Route::bind(config('structureddata.api.routes.load-entity'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\Entity')::findOrFail($id);
+        });
+            
+        // Schemas manipulation
+        Route::apiResource(config('structureddata.api.routes.load-entity'), config('structureddata.controllersNamespace') . '\EntityController');
+        
+        // NODES ...
         
         // Load the entities for a reference node
         Route::get(config('structureddata.api.routes.load-node') . '/{reference}', [
@@ -39,7 +44,7 @@ Route::group([
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
         
-        // SCHEMES...
+        // SCHEMES ...
         
         // Bind schema
         Route::bind(config('structureddata.api.routes.schema'), function($id) {
@@ -49,6 +54,8 @@ Route::group([
         // Schemas manipulation
         Route::apiResource(config('structureddata.api.routes.schema'), config('structureddata.controllersNamespace') . '\SchemaController');
         
+        // PROPERTIES ...
+        
         // Bind schema property
         Route::bind(config('structureddata.api.routes.property-schema'), function($id) {
             return (config('structureddata.modelsNamespace') . '\PropertySchema')::findOrFail($id);
@@ -57,6 +64,8 @@ Route::group([
         // Schema properties manipulation
         Route::apiResource(config('structureddata.api.routes.property-schema'), config('structureddata.controllersNamespace') 
             . '\PropertySchemaController');
+        
+        // PROPERTY TYPES ...
         
         // Bind available type for a property
         Route::bind(config('structureddata.api.routes.available-type'), function($id) {
