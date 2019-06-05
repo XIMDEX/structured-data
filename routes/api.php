@@ -46,21 +46,25 @@ Route::group([
             return (config('structureddata.modelsNamespace') . '\Schema')::findOrFail($id);
         });
         
-        // Schema manipulation
+        // Schemas manipulation
         Route::apiResource(config('structureddata.api.routes.schema'), config('structureddata.controllersNamespace') . '\SchemaController');
         
-        // Bind schema
+        // Bind schema property
         Route::bind(config('structureddata.api.routes.property-schema'), function($id) {
             return (config('structureddata.modelsNamespace') . '\PropertySchema')::findOrFail($id);
         });
         
-        // Property schema manipulation
+        // Schema properties manipulation
         Route::apiResource(config('structureddata.api.routes.property-schema'), config('structureddata.controllersNamespace') 
             . '\PropertySchemaController');
         
-        // Available types from a schema property
-        Route::get(config('structureddata.api.routes.available-types') . '/{propSchema}', [
-            'as' => 'property-types',
-            'uses' => config('structureddata.controllersNamespace') . '\PropertySchemaController@avaliableTypes']);
+        // Bind available type for a property
+        Route::bind(config('structureddata.api.routes.available-type'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\AvailableType')::findOrFail($id);
+        });
+        
+        // Available types manipulation
+        Route::apiResource(config('structureddata.api.routes.available-type'), config('structureddata.controllersNamespace')
+            . '\AvailableTypeController');
     });
 });

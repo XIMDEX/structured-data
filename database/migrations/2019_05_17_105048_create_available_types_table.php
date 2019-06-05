@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Core\Migration;
+use Ximdex\StructuredData\Models\AvailableType;
 
 class CreateAvailableTypesTable extends Migration
 {
@@ -20,7 +20,7 @@ class CreateAvailableTypesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('property_schema_id');
             $table->unsignedBigInteger('schema_id')->nullable();
-            $table->enum('type', Property::SIMPLE_TYPES)->nullable();
+            $table->enum('type', AvailableType::SIMPLE_TYPES)->nullable();
             $table->timestamps();
             
             // Indexes

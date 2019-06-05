@@ -6,9 +6,15 @@ use Ximdex\StructuredData\Core\Model;
 
 class AvailableType extends Model
 {
+    const SIMPLE_TYPES = ['Thing', 'Boolean', 'Date', 'DateTime', 'Number', 'Text', 'Time'];
+    
     public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema'];
     
     public $appends = ['schema_name'];
+    
+    public $fillable = ['schema_id', 'property_schema_id', 'type'];
+    
+    public static $except = ['property_schema_id'];
     
     public function getSchemaNameAttribute() : ?string
     {
@@ -26,5 +32,17 @@ class AvailableType extends Model
     public function propertySchema()
     {
         return $this->belongsTo(PropertySchema::class);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Ximdex\StructuredData\Core\Model::update()
+     */
+    public function update(array $attributes = [], array $options = [])
+    {
+        if ($this->type != Schema::THING_TYPE) {
+            $this->schema_id = null;
+        }
+        parent::update($attributes, $options); 
     }
 }

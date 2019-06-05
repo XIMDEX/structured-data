@@ -6,7 +6,7 @@ return [
         'load-entity-nodes' => 'entity-nodes',
         'load-node' => 'node',
         'schema' => 'schema',
-        'available-types' => 'property-available-types',
+        'available-type' => 'available-types',
         'property-schema' => 'property-schema'
     ],
     'middleware' => [

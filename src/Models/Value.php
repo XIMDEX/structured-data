@@ -5,11 +5,11 @@ namespace Ximdex\StructuredData\src\Models;
 use Ximdex\StructuredData\Core\Model;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Entity;
+use Ximdex\StructuredData\Models\Schema;
 // use Ximdex\StructuredData\Models\Schema;
 
 class Value extends Model
 {
-    /*
     public $casts = ['value' => 'type'];
     
     protected function getCastType($key)
@@ -22,7 +22,6 @@ class Value extends Model
         }
         return parent::getCastType($key);
     }
-    */
     
     public function entity()
     {

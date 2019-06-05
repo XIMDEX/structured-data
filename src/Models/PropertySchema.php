@@ -7,9 +7,9 @@ use Ximdex\StructuredData\Core\Model;
 
 class PropertySchema extends Model
 {
-    public $hidden = ['created_at', 'updated_at', 'property', 'property_id'];
+    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema_id', 'schema'];
     
-    public $appends = ['name', 'comment'];
+    public $appends = ['name', 'comment', 'schema_name'];
     
     public $fillable = ['name', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id'];
     
@@ -27,6 +27,14 @@ class PropertySchema extends Model
     {
         if ($this->property) {
             return $this->property->comment;
+        }
+        return null;
+    }
+    
+    public function getSchemaNameAttribute() : ?string
+    {
+        if ($this->schema_id) {
+            return $this->schema->name;
         }
         return null;
     }
@@ -50,6 +58,11 @@ class PropertySchema extends Model
     public function property()
     {
         return $this->belongsTo(Property::class);
+    }
+    
+    public function schema()
+    {
+        return $this->belongsTo(Schema::class);
     }
     
     public function availableTypes()
