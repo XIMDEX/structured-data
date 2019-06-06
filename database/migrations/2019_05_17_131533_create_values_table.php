@@ -24,6 +24,9 @@ class CreateValuesTable extends Migration
             $table->unsignedSmallInteger('position')->default(1);
             $table->timestamps();
             
+            // Indexes
+            $table->unique(['available_type_id', 'entity_id', 'ref_entity_id'], 'unique_entity_value');
+            
             // Relations
             $table->foreign('available_type_id')
                 ->references('id')->on("{$this->baseName}available_types")

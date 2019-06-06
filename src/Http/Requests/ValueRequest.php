@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Entity;
 use Ximdex\StructuredData\Rules\ValueInAvailableType;
+use Ximdex\StructuredData\Rules\EntityInAvailableType;
 
 class ValueRequest extends ApiRequest
 {
@@ -40,7 +41,7 @@ class ValueRequest extends ApiRequest
                 $this->addRule('position', 'gte:1');
                 $this->addRule('*', 'bail');
                 $this->addRule('value', new ValueInAvailableType($this->get('available_type_id')));
-                // $this->addRule('ref_entity_id', new EntityInAvailableType);
+                $this->addRule('ref_entity_id', new EntityInAvailableType($this->get('available_type_id')));
         }
         return $this->validations;
     }
