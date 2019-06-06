@@ -39,16 +39,16 @@ class Entity extends Model
         ];
     }
     
-    public function toJsonLD() : array
+    public function toJsonLD(bool $uid = false) : array
     {
         $object = [
             '@context' => 'http://schema.org'
         ];
-        $object = array_merge($object, $this->entityToSchema());
+        $object = array_merge($object, $this->entityToSchema($uid));
         return $object;
     }
     
-    protected function entityToSchema(int $depth = null, array & $entities = []): array
+    protected function entityToSchema(bool $uid = false, int $depth = null, array & $entities = []): array
     {
         if (in_array($this->id, $entities) === false) {
             
@@ -82,7 +82,7 @@ class Entity extends Model
                     // We dont continue if the entity has been showed before
                     $referenceEntity = $value->referenceEntity->reference();
                 } else {
-                    $referenceEntity = $value->referenceEntity->entityToSchema($depth - 1, $entities);
+                    $referenceEntity = $value->referenceEntity->entityToSchema($uid, $depth - 1, $entities);
                 }
                 if (! $referenceEntity) {
                     

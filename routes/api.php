@@ -29,8 +29,20 @@ Route::group([
             return (config('structureddata.modelsNamespace') . '\Entity')::findOrFail($id);
         });
             
-        // Schemas manipulation
-        Route::apiResource(config('structureddata.api.routes.load-entity'), config('structureddata.controllersNamespace') . '\EntityController');
+        // Entities manipulation
+        Route::apiResource(config('structureddata.api.routes.load-entity'), config('structureddata.controllersNamespace') 
+            . '\EntityController');
+        
+        // ENTITY VALUES ...
+        
+        // Bind entity value
+        Route::bind(config('structureddata.api.routes.load-value'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\Value')::findOrFail($id);
+        });
+            
+        // Entity values manipulation
+        Route::apiResource(config('structureddata.api.routes.load-value'), config('structureddata.controllersNamespace') 
+            . '\ValueController');
         
         // NODES ...
         

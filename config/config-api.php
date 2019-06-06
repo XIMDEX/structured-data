@@ -3,6 +3,7 @@
 return [
     'routes' => [
         'load-entity' => 'entity',
+        'load-value' => 'values',
         'load-entity-nodes' => 'entity-nodes',
         'load-node' => 'node',
         'schema' => 'schema',

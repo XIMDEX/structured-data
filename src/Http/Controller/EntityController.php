@@ -14,7 +14,7 @@ class EntityController extends Controller
     
     public function show(Entity $entity)
     {
-        return response()->json($entity->toJsonLD());
+        return response()->json($entity->toJsonLD(true));
     }
     
     public function store(EntityRequest $request)

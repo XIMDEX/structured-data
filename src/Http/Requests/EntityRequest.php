@@ -17,6 +17,11 @@ class EntityRequest extends ApiRequest
         $method = Request::method();
         switch ($method) {
             
+            // show
+            case 'GET':
+                $this->addRule('uid', 'boolean');
+                break;
+                
             // store | update
             case 'POST':
                 $this->addRule('schema_id', 'required');
