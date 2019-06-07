@@ -2,45 +2,51 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
-use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Entity;
 use Ximdex\StructuredData\Models\Schema;
 
-class EntityInAvailableType implements Rule
-{
-    private $availableType;
-    
-    public function __construct(int $availableTypeId)
-    {
-        $this->availableType = AvailableType::find($availableTypeId);
-    }
-    
+class EntityInAvailableType extends InAvailableTypeRule
+{   
     /**
-     * Check if the given value is supported in the property available type 
+     * Check if the given value is supported in the property available type
      * 
      * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::passes()
+     * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::passes()
      */
     public function passes($attribute, $value)
     {
+        if (parent::passes($attribute, $value) === false) {
+            return false;
+        }
+        $value = $this->value;
         if ($this->availableType->type != Schema::THING_TYPE) {
             
             // Type only support an entity
-            return false;
+            return $this->supportMultiValidation;
         }
-        $entity = Entity::findOrFail($value);
-        if ($entity->schema_id != $this->availableType->schema_id) {
-            
-            // The schema for the given entity is different for this available type
-            return false;
+        if (! is_array($value)) {
+            $value = [$value];
+        }
+        foreach ($value as $id) {
+            if (! is_numeric($id)) {
+                return false;
+            }
+            $entity = Entity::find($id);
+            if (! $entity) {
+                return false;
+            }
+            if ($entity->schema_id != $this->availableType->schema_id) {
+                
+                // The schema for the given entity is different for this available type
+                return false;
+            }
         }
         return true;
     }
 
     /**
      * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::message()
+     * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::message()
      */
     public function message()
     {

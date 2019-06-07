@@ -3,7 +3,7 @@
 namespace Ximdex\StructuredData\Controllers;
 
 use Ximdex\StructuredData\Requests\ValueRequest;
-use Ximdex\StructuredData\src\Models\Value;
+use Ximdex\StructuredData\Models\Value;
 
 class ValueController extends Controller
 {   
@@ -19,12 +19,12 @@ class ValueController extends Controller
     
     public function store(ValueRequest $request)
     {
-        Value::create($request->all());
+        return Value::create($request->all());
     }
     
     public function update(ValueRequest $request, Value $value)
     {
-        $value->update($request->all());
+        return $value->update($request->all());
     }
     
     public function destroy(Value $value)

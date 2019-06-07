@@ -3,17 +3,26 @@
 namespace Ximdex\StructuredData\Models;
 
 use Ximdex\StructuredData\Core\Model;
-use Ximdex\StructuredData\src\Models\Value;
 
 class Entity extends Model
 {
     public $fillable = ['schema_id'];
     
-    protected $appends = ['schema_url'];
+    public $hidden = ['created_at', 'updated_at', 'schema'];
+    
+    protected $appends = ['schema_url', 'schema_name'];
     
     public function getSchemaUrlAttribute(): string
     {
         return route('linked-data.' . config('structureddata.api.routes.load-entity') . '.show', ['entity' => $this->id]);
+    }
+    
+    public function getSchemaNameAttribute() : ?string
+    {
+        if ($this->schema_id) {
+            return $this->schema->name;
+        }
+        return null;
     }
     
     public function schema()
@@ -89,17 +98,17 @@ class Entity extends Model
                     // There is not values for this property
                     continue;
                 }
-                $maxCardinality = $value->availableType->propertySchema->max_cardinality;
-                if ($maxCardinality === null or $maxCardinality > 1) {
-                    $object[$property][] = $referenceEntity;
-                } else {
-                    $object[$property] = $referenceEntity;
-                }
-                $propertiesOrder[$property] = $order;
+                $entityValue = $referenceEntity;
             } else {
-                $object[$property] = $value->value;
-                $propertiesOrder[$property] = $order;
+                $entityValue = $value->value;
             }
+            $maxCardinality = $value->availableType->propertySchema->max_cardinality;
+            if ($maxCardinality === null or $maxCardinality > 1) {
+                $object[$property][] = $entityValue;
+            } else {
+                $object[$property] = $entityValue;
+            }
+            $propertiesOrder[$property] = $order;
         }
         array_multisort($propertiesOrder, $object);
         return $object;

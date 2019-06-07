@@ -50,4 +50,9 @@ class ApiRequest extends FormRequest
     {
         $this->validations[$key][] = $rule;
     }
+    
+    protected function removeRule(string $key): void
+    {
+        unset($this->validations[$key]);
+    }
 }

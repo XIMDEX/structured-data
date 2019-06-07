@@ -2,36 +2,31 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
-use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Schema;
 use Illuminate\Support\Carbon;
 
-class ValueInAvailableType implements Rule
+class ValueInAvailableType extends InAvailableTypeRule
 {
     const TIME_FORMAT = 'h:i:s';
     
     CONST DATE_FORMAT = 'd-m-Y';
     
-    private $availableType;
-    
-    public function __construct(int $availableTypeId)
-    {
-        $this->availableType = AvailableType::find($availableTypeId);
-    }
-    
     /**
-     * Check if the given value is supported in the property available type 
+     * Check if the given value is supported in the property available type
      * 
      * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::passes()
+     * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::passes()
      */
     public function passes($attribute, $value)
     {
+        if (parent::passes($attribute, $value) === false) {
+            return false;
+        }
+        $value = $this->value;
         if ($this->availableType->type == Schema::THING_TYPE) {
             
             // Type only support an entity
-            return false;
+            return $this->supportMultiValidation;
         }
         switch ($this->availableType->type) {
             
@@ -77,10 +72,10 @@ class ValueInAvailableType implements Rule
         }
         return true;
     }
-
+    
     /**
      * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::message()
+     * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::message()
      */
     public function message()
     {

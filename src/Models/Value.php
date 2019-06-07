@@ -1,17 +1,16 @@
 <?php
 
-namespace Ximdex\StructuredData\src\Models;
+namespace Ximdex\StructuredData\Models;
 
 use Ximdex\StructuredData\Core\Model;
-use Ximdex\StructuredData\Models\AvailableType;
-use Ximdex\StructuredData\Models\Entity;
-use Ximdex\StructuredData\Models\Schema;
 
 class Value extends Model
 {
     public $casts = ['value' => 'type'];
     
     public $fillable = ['available_type_id', 'entity_id', 'ref_entity_id', 'value', 'position'];
+    
+    public $hidden = ['created_at', 'updated_at'];
     
     public static $except = ['available_type_id', 'entity_id'];
     
