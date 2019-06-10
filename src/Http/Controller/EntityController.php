@@ -3,6 +3,7 @@
 namespace Ximdex\StructuredData\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Entity;
 use Ximdex\StructuredData\Requests\EntityRequest;
 use Ximdex\StructuredData\Models\AvailableType;
@@ -17,7 +18,7 @@ class EntityController extends Controller
     
     public function show(Entity $entity)
     {
-        return response()->json($entity->toJsonLD(true));
+        return response()->json($entity->toJsonLD(Request::has('extra')));
     }
     
     public function store(EntityRequest $request)

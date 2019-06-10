@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Models\PropertySchema;
 
-class SchemaPropertyDuplication implements Rule
+class SchemaPropertyDuplicationRule implements Rule
 {
     private $schema;
     

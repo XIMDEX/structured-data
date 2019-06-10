@@ -20,7 +20,6 @@ class PropertySchemaController extends Controller
     
     public function show(PropertySchema $propSchema)
     {
-        $propSchema->availableTypes;
         return response()->json($propSchema);
     }
     

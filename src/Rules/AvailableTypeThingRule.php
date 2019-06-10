@@ -5,7 +5,7 @@ namespace Ximdex\StructuredData\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Ximdex\StructuredData\Models\Schema;
 
-class AvailableTypeThing implements Rule
+class AvailableTypeThingRule implements Rule
 {
     private $schema;
     

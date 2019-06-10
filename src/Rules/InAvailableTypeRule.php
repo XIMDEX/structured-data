@@ -35,8 +35,13 @@ abstract class InAvailableTypeRule implements Rule
                 $this->availableType = AvailableType::findOrFail($value['type']);
             }
             $this->value = $value['values'];
+        } elseif (! $this->availableType) {
+            return false;
         } else {
             $this->value = $value;
+        }
+        if (! is_array($this->value)) {
+            $this->value = [$value];
         }
         return true;
     }

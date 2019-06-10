@@ -4,8 +4,12 @@ namespace Ximdex\StructuredData\Requests;
 
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Schema;
-use Ximdex\StructuredData\Rules\ValueInAvailableType;
-use Ximdex\StructuredData\Rules\EntityInAvailableType;
+use Ximdex\StructuredData\Rules\ValidPropertyRule;
+use Ximdex\StructuredData\Rules\ValueInAvailableTypeRule;
+use Ximdex\StructuredData\Rules\EntityInAvailableTypeRule;
+use Ximdex\StructuredData\Rules\NeededPropertiesRule;
+use Ximdex\StructuredData\Rules\MinCardinalityRule;
+use Ximdex\StructuredData\Rules\MaxCardinalityRule;
 
 class EntityRequest extends ApiRequest
 {   
@@ -40,8 +44,14 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.values', 'array');
                 $this->addRule('*', 'bail');
                 $this->addRule('schema_id', 'exists:' . (new Schema)->getTable() . ',id');
-                $this->addRule('properties.*', new ValueInAvailableType());
-                $this->addRule('properties.*', new EntityInAvailableType());
+                $this->addRule('properties.*', new ValidPropertyRule($this->get('schema_id')));
+                $this->addRule('properties', new NeededPropertiesRule($this->get('schema_id')));
+                $this->addRule('*', 'bail');
+                $this->addRule('properties.*', new ValueInAvailableTypeRule());
+                $this->addRule('properties.*', new EntityInAvailableTypeRule());
+                $this->addRule('*', 'bail');
+                $this->addRule('properties.*', new MinCardinalityRule());
+                $this->addRule('properties.*', new MaxCardinalityRule());
         }
         return $this->validations;
     }

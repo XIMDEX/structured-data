@@ -5,7 +5,7 @@ namespace Ximdex\StructuredData\Rules;
 use Ximdex\StructuredData\Models\Entity;
 use Ximdex\StructuredData\Models\Schema;
 
-class EntityInAvailableType extends InAvailableTypeRule
+class EntityInAvailableTypeRule extends InAvailableTypeRule
 {   
     /**
      * Check if the given value is supported in the property available type
@@ -23,9 +23,6 @@ class EntityInAvailableType extends InAvailableTypeRule
             
             // Type only support an entity
             return $this->supportMultiValidation;
-        }
-        if (! is_array($value)) {
-            $value = [$value];
         }
         foreach ($value as $id) {
             if (! is_numeric($id)) {
@@ -50,6 +47,9 @@ class EntityInAvailableType extends InAvailableTypeRule
      */
     public function message()
     {
+        if (! $this->availableType) {
+            return parent::message();
+        }
         return "The :attribute must be a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
     }
 }

@@ -5,7 +5,7 @@ namespace Ximdex\StructuredData\Requests;
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Schema;
 use Ximdex\StructuredData\Models\Property;
-use Ximdex\StructuredData\Rules\SchemaPropertyDuplication;
+use Ximdex\StructuredData\Rules\SchemaPropertyDuplicationRule;
 
 class PropertySchemaRequest extends ApiRequest
 {   
@@ -40,9 +40,13 @@ class PropertySchemaRequest extends ApiRequest
                 $this->addRule('max_cardinality', 'numeric');
                 $this->addRule('max_cardinality', 'nullable');
                 $this->addRule('max_cardinality', 'gte:1');
+                if ($this->get('max_cardinality')) {
+                    $this->addRule('min_cardinality', 'lte:' . $this->get('max_cardinality'));
+                    $this->addRule('max_cardinality', 'gte:' . $this->get('min_cardinality'));
+                }
                 $this->addRule('default_value', 'max:5000');
                 $this->addRule('*', 'bail');
-                $this->addRule('schema_id', new SchemaPropertyDuplication(
+                $this->addRule('schema_id', new SchemaPropertyDuplicationRule(
                     $this->get('schema_id'), 
                     $this->get('property_id'),
                     $this->get('name')

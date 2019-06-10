@@ -4,7 +4,7 @@ namespace Ximdex\StructuredData\Requests;
 
 use Ximdex\StructuredData\Models\Schema;
 use Illuminate\Support\Facades\Request;
-use Ximdex\StructuredData\Rules\SchemaInheritation;
+use Ximdex\StructuredData\Rules\SchemaInheritationRule;
 
 class SchemaRequest extends ApiRequest
 {   
@@ -38,7 +38,7 @@ class SchemaRequest extends ApiRequest
                 $this->addRule('inherited_schemas.*.priority', 'gte:1');
                 $this->addRule('*', 'bail');
                 $this->addRule('inherited_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
-                $this->addRule('inherited_schemas', new SchemaInheritation($id));
+                $this->addRule('inherited_schemas', new SchemaInheritationRule($id));
         }
         return $this->validations;
     }
