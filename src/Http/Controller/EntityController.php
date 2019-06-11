@@ -5,6 +5,7 @@ namespace Ximdex\StructuredData\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Entity;
+use Ximdex\StructuredData\Models\Value;
 use Ximdex\StructuredData\Requests\EntityRequest;
 
 class EntityController extends Controller
@@ -45,18 +46,13 @@ class EntityController extends Controller
         // Update the entity values
         $entity->update($request->all());
         
-        // Update the entity properties values
-        /*
-        if (Request::method() == 'PUT') {
-            $entity->values()->delete();
-            $delete = false;
-        } else  {
-            
-            // Patch method
-            $delete = true;
+        // Values deletion by given ids in request parameter
+        if (is_array($request->delete)) {
+            Value::destroy($request->delete);
         }
-        */
-        $entity->loadValuesFromProperties($request->properties);    // , $delete);
+        
+        // Update the entity properties values
+        $entity->loadValuesFromProperties($request->properties);
         $entity->push();
         
         // Save entity data

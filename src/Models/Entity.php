@@ -44,7 +44,7 @@ class Entity extends Model
     }
     
     /**
-     * Load the 
+     * Load the values for the given properties to add or update in this entity
      * 
      * @param array $properties
      * @param bool $delete
@@ -55,7 +55,7 @@ class Entity extends Model
             $position = 1;
             foreach ($property['values'] as $value) {
                 $type = AvailableType::findOrFail($property['type']);
-                if ($delete or (isset($property['delete']) and $property['delete'])) {
+                if ($delete or (isset($property['deleteAll']) and $property['deleteAll'])) {
                     
                     // Delete all the current values for this property
                     $this->values()->where('available_type_id', $type->id)->delete();
