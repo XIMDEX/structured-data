@@ -29,6 +29,9 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
             return $this->supportMultiValidation;
         }
         foreach ($value as & $val) {
+            
+            // TODO ajlucena
+            
             switch ($this->availableType->type) {
                 
                 // Check if value is a valid boolean type

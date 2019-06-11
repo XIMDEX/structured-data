@@ -4,12 +4,11 @@ namespace Ximdex\StructuredData\Requests;
 
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Schema;
+use Ximdex\StructuredData\Models\Value;
 use Ximdex\StructuredData\Rules\ValidPropertyRule;
 use Ximdex\StructuredData\Rules\ValueInAvailableTypeRule;
 use Ximdex\StructuredData\Rules\EntityInAvailableTypeRule;
 use Ximdex\StructuredData\Rules\NeededPropertiesRule;
-use Ximdex\StructuredData\Rules\MinCardinalityRule;
-use Ximdex\StructuredData\Rules\MaxCardinalityRule;
 
 class EntityRequest extends ApiRequest
 {   
@@ -21,6 +20,11 @@ class EntityRequest extends ApiRequest
     {
         parent::rules();
         $method = Request::method();
+        if ($this->entity and $this->entity->schema_id) {
+            $schemaId = $this->entity->schema_id;
+        } else {
+            $schemaId = $this->get('schema_id');
+        }
         switch ($method) {
             
             // show
@@ -35,6 +39,9 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.type', 'required');
                 $this->addRule('properties.*.values', 'required');
             case 'PUT':
+                if ($schemaId) {
+                    $this->addRule('properties', new NeededPropertiesRule($schemaId));
+                }
             case 'PATCH':
                 $this->addRule('schema_id', 'numeric');
                 $this->addRule('schema_id', 'gte:1');
@@ -42,16 +49,26 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.type', 'numeric');
                 $this->addRule('properties.*.type', 'gte:1');
                 $this->addRule('properties.*.values', 'array');
+                $this->addRule('properties.*.values.*.id', 'numeric');
+                $this->addRule('properties.*.values.*.id', 'gte:1');
+                $this->addRule('properties.*.values.*.id', 'required_with:properties.*.values.*.value');
+                $this->addRule('properties.*.values.*.value', 'required_with:properties.*.values.*.id');
+                $this->addRule('properties.*.values.*.id', 'gte:1');
+                $this->addRule('properties.*.values.delete', 'boolean');
                 $this->addRule('*', 'bail');
                 $this->addRule('schema_id', 'exists:' . (new Schema)->getTable() . ',id');
-                $this->addRule('properties.*', new ValidPropertyRule($this->get('schema_id')));
-                $this->addRule('properties', new NeededPropertiesRule($this->get('schema_id')));
+                $this->addRule('properties.*.values.*.id', 'exists:' . (new Value)->getTable() . ',id');
                 $this->addRule('*', 'bail');
+                if ($schemaId) {
+                    $this->addRule('properties.*', new ValidPropertyRule($schemaId));
+                }
                 $this->addRule('properties.*', new ValueInAvailableTypeRule());
                 $this->addRule('properties.*', new EntityInAvailableTypeRule());
+                /*
                 $this->addRule('*', 'bail');
                 $this->addRule('properties.*', new MinCardinalityRule());
                 $this->addRule('properties.*', new MaxCardinalityRule());
+                */
         }
         return $this->validations;
     }

@@ -10,7 +10,10 @@ class Entity extends Model
     
     public $hidden = ['created_at', 'updated_at', 'schema'];
     
+    public static $except = ['schema_id'];
+    
     protected $appends = ['schema_url', 'schema_name'];
+    
     
     public function getSchemaUrlAttribute(): string
     {
@@ -38,6 +41,57 @@ class Entity extends Model
     public function values()
     {
         return $this->hasMany(Value::class);
+    }
+    
+    /**
+     * Load the 
+     * 
+     * @param array $properties
+     * @param bool $delete
+     */
+    public function loadValuesFromProperties(array $properties, bool $delete = false): void
+    {
+        foreach ($properties as $property) {
+            $position = 1;
+            foreach ($property['values'] as $value) {
+                $type = AvailableType::findOrFail($property['type']);
+                if ($delete or (isset($property['delete']) and $property['delete'])) {
+                    
+                    // Delete all the current values for this property
+                    $this->values()->where('available_type_id', $type->id)->delete();
+                }
+                if ($type->type == Schema::THING_TYPE) {
+                    
+                    // Value is an entity ID
+                    $entityId = $value;
+                    $value = null;
+                } else {
+                    $entityId = null;
+                }
+                $updated = false;
+                if (is_array($value)) {
+                    if ($entityValue = $this->values->find($value['id'])) {
+                        
+                        // Update an existing property value in this entity
+                        $entityValue->value = $value['value'];
+                        $entityValue->ref_entity_id = $entityId;
+                        $entityValue->position = $position++;
+                        $updated = true;
+                    }
+                }
+                if (! $updated) {
+                    
+                    // Create a new property value with given data
+                    $this->values->add(new Value([
+                        'entity_id' => $this->id, 
+                        'available_type_id' => $type->id,
+                        'value' => $value,
+                        'ref_entity_id' => $entityId,
+                        'position' => $position++
+                    ]));
+                }
+            }
+        }
     }
     
     public function reference()

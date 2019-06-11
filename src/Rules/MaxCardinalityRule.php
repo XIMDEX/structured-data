@@ -5,6 +5,8 @@ namespace Ximdex\StructuredData\Rules;
 class MaxCardinalityRule extends InAvailableTypeRule
 {
     /**
+     * Check if the count of values for the actual property is not greater than maximun allowed in the given schema
+     * 
      * {@inheritDoc}
      * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::passes()
      */
@@ -15,8 +17,12 @@ class MaxCardinalityRule extends InAvailableTypeRule
         }
         $value = $this->value;
         $maxCardinality = $this->availableType->propertySchema->max_cardinality;
-        if ($maxCardinality > 0 and count($this->value) > $maxCardinality) {
-            return false;
+        if ($maxCardinality > 0) {
+            
+            // Given values count
+            if (count($this->value) > $maxCardinality) {
+                return false;
+            }
         }
         return true;
     }

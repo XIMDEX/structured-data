@@ -24,6 +24,9 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
             // Type only support an entity
             return $this->supportMultiValidation;
         }
+        
+        // TODO ajlucena
+        
         foreach ($value as $id) {
             if (! is_numeric($id)) {
                 return false;
