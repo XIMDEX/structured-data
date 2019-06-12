@@ -53,12 +53,22 @@ class Entity extends Model
     {
         foreach ($properties as $property) {
             $position = 1;
+            $deleted = [];
             foreach ($property['values'] as $value) {
+                
+                // Value can be an array contain the id, value and other optional information
+                if (is_array($value)) {
+                    $id = $value['id'];
+                    $value = $value['value'];
+                } else {
+                    $id = null;
+                }
                 $type = AvailableType::findOrFail($property['type']);
-                if ($delete or (isset($property['deleteAll']) and $property['deleteAll'])) {
+                if ($delete or (isset($property['deleteAll']) and $property['deleteAll']) and ! in_array($type->id, $deleted)) {
                     
                     // Delete all the current values for this property
                     $this->values()->where('available_type_id', $type->id)->delete();
+                    $deleted[] = $type->id;
                 }
                 if ($type->type == Schema::THING_TYPE) {
                     
@@ -69,11 +79,11 @@ class Entity extends Model
                     $entityId = null;
                 }
                 $updated = false;
-                if (is_array($value)) {
-                    if ($entityValue = $this->values->find($value['id'])) {
+                if ($id) {
+                    if ($entityValue = $this->values->find($id)) {
                         
                         // Update an existing property value in this entity
-                        $entityValue->value = $value['value'];
+                        $entityValue->value = $value;
                         $entityValue->ref_entity_id = $entityId;
                         $entityValue->position = $position++;
                         $updated = true;
@@ -107,6 +117,9 @@ class Entity extends Model
         $object = [
             '@context' => 'http://schema.org'
         ];
+        if ($uid) {
+            $object['@uid'] = $this->schema->id;
+        }
         $object = array_merge($object, $this->entityToSchema($uid));
         return $object;
     }
@@ -146,6 +159,9 @@ class Entity extends Model
                     $referenceEntity = $value->referenceEntity->reference();
                 } else {
                     $referenceEntity = $value->referenceEntity->entityToSchema($uid, $depth - 1, $entities);
+                    if ($uid) {
+                        $referenceEntity['@uid'] = $value->id;
+                    }
                 }
                 if (! $referenceEntity) {
                     
@@ -154,7 +170,11 @@ class Entity extends Model
                 }
                 $entityValue = $referenceEntity;
             } else {
-                $entityValue = $value->value;
+                if ($uid) {
+                    $entityValue = ['@uid' => $value->id, '@value' => $value->value];
+                } else {
+                    $entityValue = $value->value;
+                }
             }
             $maxCardinality = $value->availableType->propertySchema->max_cardinality;
             if ($maxCardinality === null or $maxCardinality > 1) {

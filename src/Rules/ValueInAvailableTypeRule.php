@@ -30,8 +30,10 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
         }
         foreach ($value as & $val) {
             
-            // TODO ajlucena
-            
+            // If value contains the type, get only the value given
+            if (is_array($val)) {
+                $val = $val['value'];
+            }
             switch ($this->availableType->type) {
                 
                 // Check if value is a valid boolean type
