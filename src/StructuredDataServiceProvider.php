@@ -21,6 +21,10 @@ class StructuredDataServiceProvider extends ServiceProvider
             $this->bootForConsole();
         }
         
+        $this->commands([
+            \Ximdex\StructuredData\Commands\SchemaImporter::class
+        ]);
+        
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
     }
@@ -78,6 +82,6 @@ class StructuredDataServiceProvider extends ServiceProvider
         ], 'linkeddata.views');*/
 
         // Registering package commands.
-        // $this->commands([]);
+       
     }
 }

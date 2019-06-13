@@ -56,7 +56,7 @@ Route::group([
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
         
-        // SCHEMES ...
+        // SCHEMAS ...
         
         // Bind schema
         Route::bind(config('structureddata.api.routes.schema'), function($id) {
@@ -65,6 +65,14 @@ Route::group([
         
         // Schemas manipulation
         Route::apiResource(config('structureddata.api.routes.schema'), config('structureddata.controllersNamespace') . '\SchemaController');
+        
+        // Schemas importer command
+        Route::get(config('structureddata.api.routes.schemas-import'), function() {
+            $res = Artisan::call('schemas:import', [
+                'url' => Request::get('url')
+            ]);
+            return $res;
+        });
         
         // PROPERTIES ...
         

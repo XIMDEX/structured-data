@@ -158,7 +158,7 @@ class Entity extends Model
                     // We dont continue if the entity has been showed before
                     $referenceEntity = $value->referenceEntity->reference();
                 } else {
-                    $referenceEntity = $value->referenceEntity->entityToSchema($uid, $depth - 1, $entities);
+                    $referenceEntity = $value->referenceEntity->entityToSchema(false, $depth - 1, $entities);
                     if ($uid) {
                         $referenceEntity['@uid'] = $value->id;
                     }

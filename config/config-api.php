@@ -8,7 +8,8 @@ return [
         'load-node' => 'node',
         'schema' => 'schema',
         'available-type' => 'available-types',
-        'property-schema' => 'property-schema'
+        'property-schema' => 'property-schema',
+        'schemas-import' => 'schemas-import'
     ],
     'middleware' => [
         'base' => 'api',
