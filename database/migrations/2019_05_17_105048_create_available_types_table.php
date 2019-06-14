@@ -20,7 +20,7 @@ class CreateAvailableTypesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('property_schema_id');
             $table->unsignedBigInteger('schema_id')->nullable();
-            $table->enum('type', AvailableType::SIMPLE_TYPES)->nullable();
+            $table->enum('type', AvailableType::TYPES)->nullable();
             $table->timestamps();
             
             // Indexes

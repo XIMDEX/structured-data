@@ -4,6 +4,7 @@ namespace Ximdex\StructuredData\Rules;
 
 use Ximdex\StructuredData\Models\Schema;
 use Illuminate\Support\Carbon;
+use Ximdex\StructuredData\Models\AvailableType;
 
 class ValueInAvailableTypeRule extends InAvailableTypeRule
 {
@@ -37,35 +38,35 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
             switch ($this->availableType->type) {
                 
                 // Check if value is a valid boolean type
-                case 'Boolean':
+                case AvailableType::BOOLEAN_TYPE:
                     if (! in_array($val, ['true', 'false', '1', '0'])) {
                         return false;
                     }
                     break;
     
                 // Check if value is a valid number type
-                case 'Number':
+                case AvailableType::NUMBER_TYPE:
                     if (! is_numeric($val)) {
                         return false;
                     }
                     break;
                     
                 // Check if value is a valid date type
-                case 'Date':
+                case AvailableType::DATE_TYPE:
                     $format = self::DATE_FORMAT;
                 
                 // Check if value is a valid time type
-                case 'Time':
+                case AvailableType::TIME_TYPE:
                     $format = self::TIME_FORMAT;
                 
                 // Check if value is a valid date time type
-                case 'DateTime':
+                case AvailableType::DATETIME_TYPE:
                     $format = self::DATE_FORMAT . ' ' . self::TIME_FORMAT;
                     
                 // Check the format for date | time
-                case 'Date':
-                case 'Time':
-                case 'DateTime':
+                case AvailableType::DATE_TYPE:
+                case AvailableType::TIME_TYPE:
+                case AvailableType::DATETIME_TYPE:
                     try {
                         $val = Carbon::createFromFormat($format, $val);
                         if ($val === false) {

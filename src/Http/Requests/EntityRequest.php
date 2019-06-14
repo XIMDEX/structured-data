@@ -61,7 +61,7 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.values.deleteAll', 'boolean');
                 $this->addRule('*', 'bail');
                 $this->addRule('schema_id', 'exists:' . (new Schema)->getTable() . ',id');
-                if ($this->entity->id) {
+                if ($this->entity and $this->entity->id) {
                     
                     // The value must be present in the Values table and be associated to the entity to update
                     $this->addRule('delete', Rule::exists((new Value)->getTable(), 'id')->where(function ($query) {

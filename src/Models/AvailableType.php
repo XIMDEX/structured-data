@@ -6,7 +6,29 @@ use Ximdex\StructuredData\Core\Model;
 
 class AvailableType extends Model
 {
-    const SIMPLE_TYPES = ['Thing', 'Boolean', 'Date', 'DateTime', 'Number', 'Text', 'Time'];
+    const THING_TYPE = Schema::THING_TYPE;
+    
+    const BOOLEAN_TYPE = 'Boolean';
+    
+    const DATE_TYPE = 'Date';
+    
+    const DATETIME_TYPE = 'DateTime';
+    
+    const NUMBER_TYPE = 'Number';
+    
+    const TEXT_TYPE = 'Text';
+    
+    const TIME_TYPE = 'Time';
+    
+    const SIMPLE_TYPES = [
+        self::THING_TYPE,
+        self::BOOLEAN_TYPE,
+        self::DATE_TYPE,
+        self::DATETIME_TYPE,
+        self::NUMBER_TYPE,
+        self::TEXT_TYPE,
+        self::TIME_TYPE
+    ];
     
     public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema'];
     

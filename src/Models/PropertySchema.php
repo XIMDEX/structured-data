@@ -7,7 +7,7 @@ use Ximdex\StructuredData\Core\Model;
 
 class PropertySchema extends Model
 {
-    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema_id', 'schema', 'availableTypes'];
+    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes'];
     
     public $appends = ['name', 'comment', 'schema_name', 'types'];
     

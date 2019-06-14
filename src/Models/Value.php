@@ -6,24 +6,26 @@ use Ximdex\StructuredData\Core\Model;
 
 class Value extends Model
 {
-    public $casts = ['value' => 'type'];
-    
     public $fillable = ['available_type_id', 'entity_id', 'ref_entity_id', 'value', 'position'];
     
     public $hidden = ['created_at', 'updated_at'];
     
     public static $except = ['available_type_id', 'entity_id'];
     
+    /*
+    public $casts = ['value' => 'type'];
+    
     protected function getCastType($key)
     {
         if ($key == 'value' and $this->type != Schema::THING_TYPE) {
-            if ($this->type == 'Number') {
+            if ($this->type == AvailableType::NUMBER_TYPE) {
                 return (int) $this->value;
             }
             return $this->type;
         }
         return parent::getCastType($key);
     }
+    */
     
     public function entity()
     {
