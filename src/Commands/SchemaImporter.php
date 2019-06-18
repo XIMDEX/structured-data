@@ -7,42 +7,49 @@ use Illuminate\Support\Facades\DB;
 use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Models\PropertySchema;
 use Ximdex\StructuredData\Models\Schema;
+use Ximdex\StructuredData\Models\Version;
 use GuzzleHttp\Client;
 use Ximdex\StructuredData\Models\AvailableType;
 
 class SchemaImporter extends Command
 {
     /**
-     * The name and signature of the console command.
+     * Simple types used for schema properties for available types
+     *
+     * @var array
+     */
+    const SIMPLE_SCHEMA_TYPES = [
+        'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
+        'http://schema.org/Date' => AvailableType::DATE_TYPE,
+        'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
+        'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
+        'http://schema.org/Text' => AvailableType::TEXT_TYPE,
+        'http://schema.org/Time' => AvailableType::TIME_TYPE,
+        'rdfs:Class' => AvailableType::THING_TYPE
+    ];
+    
+    /**
+     * The name and signature of the console command
      *
      * @var string
      */
     protected $signature = 'schemas:import {url}';
 
     /**
-     * The console command description.
+     * The console command description
      *
      * @var string
      */
     protected $description = 'Schemas and attributes importer';
     
-    /**
-     * Simple types used for schema properties for available types
-     * 
-     * @var array
-     */
-    const SIMPLE_SCHEMA_TYPES = [
-        'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE, 
-        'http://schema.org/Date' => AvailableType::DATE_TYPE, 
-        'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE, 
-        'http://schema.org/Number' => AvailableType::NUMBER_TYPE, 
-        'http://schema.org/Text' => AvailableType::TEXT_TYPE, 
-        'http://schema.org/Time' => AvailableType::TIME_TYPE,
-        'rdfs:Class' => AvailableType::THING_TYPE
-    ];
+    private $schemas;
+    
+    private $properties;
+    
+    private $version;
     
     /**
-     * Create a new command instance.
+     * Create a new command instance
      *
      * @return void
      */
@@ -52,7 +59,7 @@ class SchemaImporter extends Command
     }
 
     /**
-     * Execute the console command.
+     * Execute the console command
      *
      * @return mixed
      */
@@ -63,173 +70,40 @@ class SchemaImporter extends Command
             $this->error("Invalid URL {$url} (Ex. use http://schema.org/version/latest/all-layers.jsonld)");
             return 1;
         }
-        // $verbose = $this->options('v');
         
         // Read URL content
-        $this->info('Reading ' . $url);
         try {
-            $client = new Client();
-            $response = $client->request('GET', $url);
-            unset($client);
-            if ($response->getHeader('Content-Type')[0] != 'application/ld+json') {
-                throw new \Exception('The content of the URL must be of type ld+json');
-            }
-            $content = $response->getBody();
-            unset($response);
+            $data = $this->readFromURL($url);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
             return 2;
         }
-        $this->info('Content from URL has been readed');
-        
-        // Load JSON code
-        $this->info('Getting schemas information from URL content');
-        $data = json_decode($content, true);
-        unset($content);
         
         // Load schemas and properties from JSON source
         try {
-            $result = $this->readFromJson($data);
+            $this->readFromJson($data);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
             return 3;
         }
         unset($data);
-        $schemas = & $result['schemas'];
-        $properties = & $result['properties'];
         $this->info('Schemas information has been processed successfully');
         
         // Start a transaction
         $this->info('Starting database transaction');
         DB::beginTransaction();
         
-        // Process data
-        $this->info('Generating schemas...');
-        $bar = $this->output->createProgressBar(count($schemas));
-        $bar->start();
-        foreach ($schemas as & $schema) {
-            
-            // Create or update the schema
-            $schemaModel = Schema::updateOrCreate(
-                ['name' => $schema['name']],
-                ['comment' => $schema['comment']]
-            );
-            $schema['id'] = $schemaModel->id;
-            $bar->advance();
-        }
-        $bar->finish();
-        $this->line(' Finished');
+        // Generate a new importing version
+        // $this->version = Version::create(['name' => $url]);
+        
+        // Process schemas
+        $this->processSchemas();
         
         // Create the heritable relations between schemas
-        $this->info('Creating the relations between schemas...');
-        $bar->start();
-        $errors = [];
-        foreach ($schemas as $schema) {
-            if (! isset($schema['inheritedOf'])) {
-                continue;
-            }
-            $inheritedSchemas = [];
-            foreach ($schema['inheritedOf'] as $schemaId) {
-                if (array_key_exists($schemaId, self::SIMPLE_SCHEMA_TYPES)) {
-                    
-                    // Avoid possible relations to simple types
-                    continue;
-                }
-                if (! array_key_exists($schemaId, $schemas)) {
-                    $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['name']} schema";
-                    continue;
-                }
-                $inheritedSchemas[] = $schemas[$schemaId]['id'];
-            }
-            Schema::findOrFail($schema['id'])->inheritedSchemas()->syncWithoutDetaching($inheritedSchemas);
-            $bar->advance();
-        }
-        $bar->finish();
-        $this->line(' Finished');
-        foreach ($errors as $error) {
-            $this->warn($error);
-        }
+        $this->processSchemasRelations();
         
         // Create the schemas properties
-        $this->info('Creating properties...');
-        $bar = $this->output->createProgressBar(count($properties));
-        $bar->start();
-        $errors = [];
-        foreach ($properties as $property) {
-            
-            // If the property is superseded by another one, avoid the creation and warn it
-            if (array_key_exists('supersededBy', $property)) {
-                $errors[] = "Property {$property['name']} is superseded by {$property['supersededBy'][0]}";
-                continue;
-            }
-            
-            // Check the schemas and values given
-            if (! array_key_exists('schemas', $property)) {
-                $errors[] = "Property {$property['name']} does not provide a schema to assing";
-                continue;
-            }
-            if (! array_key_exists('types', $property)) {
-                $errors[] = "Property {$property['name']} does not provide a type value to use";
-                continue;
-            }
-            
-            // Create or update the property
-            $propertyModel = Property::updateOrCreate(
-                ['name' => $property['name']],
-                ['comment' => $property['comment']]
-            );
-            
-            // Assing the property to its schemas
-            $propSchemas = [];
-            if (array_key_exists('schemas', $property)) {
-                foreach ($property['schemas'] as $schemaId) {
-                    if (! array_key_exists($schemaId, $schemas)) {
-                        $errors[] = "Schema {$schemaId} not found for {$property['name']} property";
-                        continue;
-                    }
-                    
-                    // Create the relation between the schema and property if not exists
-                    $propSchemas[] = PropertySchema::firstOrCreate([
-                        'schema_id' => $schemas[$schemaId]['id'],
-                        'property_id' => $propertyModel->id
-                    ]);
-                }
-            }
-            
-            // For any schema create the available type information from possible values supported in this property
-            foreach ($property['types'] as $type) {
-                
-                // Load the schema or simple type
-                if (array_key_exists($type, self::SIMPLE_SCHEMA_TYPES)) {
-                    
-                    // It is a simple schema type
-                    $schemaId = null;
-                    $type = self::SIMPLE_SCHEMA_TYPES[$type];
-                } else {
-                    
-                    // the available type must be a schema
-                    if (! array_key_exists($type, $schemas)) {
-                        $errors[] = "Schema type {$type} not found for {$property['name']} property";
-                        continue;
-                    }
-                    $schemaId = $schemas[$type]['id'];
-                    $type = Schema::THING_TYPE;
-                }
-                foreach ($propSchemas as $propSchema) {
-                    AvailableType::updateOrCreate([
-                        'type' => $type,
-                        'schema_id' => $schemaId,
-                        'property_schema_id' => $propSchema->id
-                    ]);
-                }
-            }
-            $bar->advance();
-        }
-        $bar->finish();
-        $this->line(' Finished');
-        foreach ($errors as $error) {
-            $this->warn($error);
-        }
+        $this->processProperties();
         
         // Commit and close transaction
         $this->info('Closing database transaction');
@@ -240,19 +114,47 @@ class SchemaImporter extends Command
     }
     
     /**
+     * Read and return the content of an URL given, also check if this content is LD+JSON type
+     * 
+     * @param string $url
+     * @throws \Exception
+     * @return array
+     */
+    private function readFromURL(string $url): array
+    {
+        // Read from URL content
+        $this->info('Reading ' . $url);
+        $client = new Client();
+        $response = $client->request('GET', $url);
+        unset($client);
+        if ($response->getHeader('Content-Type')[0] != 'application/ld+json') {
+            throw new \Exception('The content of the URL must be of type ld+json');
+        }
+        $content = $response->getBody();
+        unset($response);
+        $this->info('Content from URL has been readed');
+        
+        // Load JSON code
+        $this->info('Getting schemas information from URL content');
+        $data = json_decode($content, true);
+        return $data;
+    }
+    
+    /**
      * Read an array with JSON retrieved data and return an array ready to use for this database importer
      * 
      * @param array $data
      * @throws \Exception
      * @return array
      */
-    private function readFromJson(array $data): array
+    private function readFromJson(array $data): void
     {
         if (! isset($data['@graph'])) {
             throw new \Exception('URL does not contain schemas information');
         }
-        $schemas = [];
-        $properties = [];
+        $replaced = [];
+        $this->schemas = [];
+        $this->properties = [];
         foreach ($data['@graph'] as $element) {
             if ($element['@type'] == 'rdfs:Class') {
                 
@@ -260,13 +162,23 @@ class SchemaImporter extends Command
                 $schema = $this->retrieveElementData($element);
                 if (isset($element['rdfs:subClassOf'])) {
                     $schema['inheritedOf'] = $this->retrieveElements($element['rdfs:subClassOf']);
-                    // $schema['inheritedOf'] = array_column($element['rdfs:subClassOf'], '@id');
                 }
-                $schemas[$element['@id']] = $schema;
+                $this->schemas[$element['@id']] = $schema;
             } elseif ($element['@type'] == 'rdf:Property') {
                 
                 // Element is a property type
                 $property = $this->retrieveElementData($element);
+                
+                // May property is superseded by another one, avoid its creation
+                if (isset($element['http://schema.org/supersededBy'])) {
+                    $supersededBy = $this->retrieveElements($element['http://schema.org/supersededBy']);
+                    if (array_key_exists($supersededBy[0], $this->properties)) {
+                        $this->properties[$supersededBy[0]]['replaces'] = $property['name'];
+                    } else {
+                        $replaced[$supersededBy[0]] = $property['name'];
+                    }
+                    continue;
+                }
                 
                 // Schemas using this property
                 if (isset($element['http://schema.org/domainIncludes'])) {
@@ -278,17 +190,13 @@ class SchemaImporter extends Command
                     $property['types'] = $this->retrieveElements($element['http://schema.org/rangeIncludes']);
                 }
                 
-                // May property is superseded by another one
-                if (isset($element['http://schema.org/supersededBy'])) {
-                    $property['supersededBy'] = $this->retrieveElements($element['http://schema.org/supersededBy']);
+                // If this property replaces another one, 
+                if (array_key_exists($element['@id'], $replaced)) {
+                    $property['replaces'] = $replaced[$element['@id']];
                 }
-                $properties[$element['@id']] = $property;
+                $this->properties[$element['@id']] = $property;
             }
         }
-        return [
-            'schemas' => $schemas, 
-            'properties' => $properties
-        ];
     }
     
     /**
@@ -325,5 +233,160 @@ class SchemaImporter extends Command
             }
         }
         return $result;
+    }
+    
+    /**
+     * Create or update database schemas from privous loaded content
+     *
+     * @throws \Exception
+     */
+    private function processSchemas(): void
+    {
+        $this->info('Generating schemas...');
+        if (! is_array($this->schemas)) {
+            throw new \Exception('No schemas loaded');
+        }
+        $bar = $this->output->createProgressBar(count($this->schemas));
+        $bar->start();
+        foreach ($this->schemas as & $schema) {
+            
+            // Create or update the schema
+            $schemaModel = Schema::updateOrCreate(
+                ['name' => $schema['name']],
+                ['comment' => $schema['comment']]
+            );
+            $schema['id'] = $schemaModel->id;
+            $bar->advance();
+        }
+        $bar->finish();
+        $this->line(' Finished');
+    }
+    
+    /**
+     * Generate the inheritable relations between schemas in database
+     *
+     * @throws \Exception
+     */
+    private function processSchemasRelations(): void
+    {
+        $this->info('Creating the relations between schemas...');
+        if (! is_array($this->schemas)) {
+            throw new \Exception('No schemas loaded');
+        }
+        $bar = $this->output->createProgressBar(count($this->schemas));
+        $bar->start();
+        $errors = [];
+        foreach ($this->schemas as $schema) {
+            if (! isset($schema['inheritedOf'])) {
+                continue;
+            }
+            $inheritedSchemas = [];
+            foreach ($schema['inheritedOf'] as $schemaId) {
+                if (array_key_exists($schemaId, self::SIMPLE_SCHEMA_TYPES)) {
+                    
+                    // Avoid possible relations to simple types
+                    continue;
+                }
+                if (! array_key_exists($schemaId, $this->schemas)) {
+                    $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['name']} schema";
+                    continue;
+                }
+                $inheritedSchemas[] = $this->schemas[$schemaId]['id'];
+            }
+            Schema::findOrFail($schema['id'])->inheritedSchemas()->syncWithoutDetaching($inheritedSchemas);
+            $bar->advance();
+        }
+        $bar->finish();
+        $this->line(' Finished');
+        foreach ($errors as $error) {
+            $this->warn($error);
+        }
+    }
+    
+    /**
+     * Create or update the database properties and available types
+     *
+     * @throws \Exception
+     */
+    private function processProperties(): void
+    {
+        $this->info('Creating properties...');
+        if (! is_array($this->schemas)) {
+            throw new \Exception('No schemas loaded');
+        }
+        if (! is_array($this->properties)) {
+            throw new \Exception('No properties loaded');
+        }
+        $bar = $this->output->createProgressBar(count($this->properties));
+        $bar->start();
+        $errors = [];
+        foreach ($this->properties as $property) {
+
+            // Check the schemas and values given
+            if (! array_key_exists('schemas', $property)) {
+                $errors[] = "Property {$property['name']} does not provide a schema to assing";
+                continue;
+            }
+            if (! array_key_exists('types', $property)) {
+                $errors[] = "Property {$property['name']} does not provide a type value to use";
+                continue;
+            }
+            
+            // Create or update the property
+            $propertyModel = Property::updateOrCreate(
+                ['name' => $property['name']], 
+                ['comment' => $property['comment']]);
+            
+            // Assing the property to its schemas
+            $propSchemas = [];
+            if (array_key_exists('schemas', $property)) {
+                foreach ($property['schemas'] as $schemaId) {
+                    if (! array_key_exists($schemaId, $this->schemas)) {
+                        $errors[] = "Schema {$schemaId} not found for {$property['name']} property";
+                        continue;
+                    }
+                    
+                    // Create the relation between the schema and property if not exists
+                    $propSchemas[] = PropertySchema::firstOrCreate([
+                        'schema_id' => $this->schemas[$schemaId]['id'], 
+                        'property_id' => $propertyModel->id
+                    ]);
+                }
+            }
+            
+            // For any schema create the available type information from possible values supported in this property
+            foreach ($property['types'] as $type) {
+                
+                // Load the schema or simple type
+                if (array_key_exists($type, self::SIMPLE_SCHEMA_TYPES)) {
+                    
+                    // It is a simple schema type
+                    $schemaId = null;
+                    $type = self::SIMPLE_SCHEMA_TYPES[$type];
+                } else {
+                    
+                    // the available type must be a schema
+                    if (! array_key_exists($type, $this->schemas)) {
+                        $errors[] = "Schema type {$type} not found for {$property['name']} property";
+                        continue;
+                    }
+                    $schemaId = $this->schemas[$type]['id'];
+                    $type = Schema::THING_TYPE;
+                }
+                foreach ($propSchemas as $propSchema) {
+                    AvailableType::updateOrCreate([
+                        'type' => $type, 
+                        'schema_id' => $schemaId, 
+                        'property_schema_id' => $propSchema->id
+                    ]);
+                }
+            }
+            $bar->advance();
+        }
+        $bar->finish();
+        $this->line(' Finished');
+        foreach ($errors as $error) {
+            $this->warn($error);
+        }
     }
 }
