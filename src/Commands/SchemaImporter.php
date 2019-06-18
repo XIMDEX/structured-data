@@ -33,7 +33,7 @@ class SchemaImporter extends Command
      *
      * @var string
      */
-    protected $signature = 'schemas:import {url}';
+    protected $signature = 'schemas:import {url} {tag?}';
 
     /**
      * The console command description
@@ -70,6 +70,11 @@ class SchemaImporter extends Command
             $this->error("Invalid URL {$url} (Ex. use http://schema.org/version/latest/all-layers.jsonld)");
             return 1;
         }
+        $this->version = new Version();
+        $this->version->url = $url;
+        if ($tag = $this->argument('tag')) {
+            $this->version->tag = $tag;
+        }
         
         // Read URL content
         try {
@@ -95,7 +100,7 @@ class SchemaImporter extends Command
         try {
             
             // Generate a new importing version
-            $this->version = Version::create(['name' => $url]);
+            $this->version->save();
             
             // Process schemas
             $this->processSchemas();
@@ -106,6 +111,7 @@ class SchemaImporter extends Command
             // Create the schemas properties
             $this->processProperties();
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->error($e->getMessage());
             return 4;
         }
@@ -150,7 +156,6 @@ class SchemaImporter extends Command
      * 
      * @param array $data
      * @throws \Exception
-     * @return array
      */
     private function readFromJson(array $data): void
     {
@@ -159,7 +164,17 @@ class SchemaImporter extends Command
         }
         $this->schemas = [];
         $this->properties = [];
+        if ($this->version->tag === null) {
+            if (array_key_exists('@id', $data)) {
+                $this->version->tag = $data['@id'];
+            } else {
+                throw new \Exception('Cannot load a version tag from source data given (@id)');
+            }
+        }
         foreach ($data['@graph'] as $element) {
+            if (! array_key_exists('@type', $element)) {
+                continue;
+            }
             if ($element['@type'] == 'rdfs:Class') {
                 
                 // Element is an schema type
@@ -317,10 +332,28 @@ class SchemaImporter extends Command
         $bar->start();
         $errors = [];
         foreach ($this->properties as $property) {
-
-            // This property is superseded by another one
-            if (! array_key_exists('supersededBy', $property)) {
+            
+            // If this property is superseded by another one
+            if (array_key_exists('supersededBy', $property)) {
                 
+                // Check if deprecated property does not exists in database to continue to avoid its updation
+                $propertyModel = Property::where('name', $property['name'])->first();
+                if (! $propertyModel) {
+                    
+                    // Dont create this deprecated property
+                    continue;
+                }
+                
+                // If there is not created a superseder property with new version name, update the name (reuse)
+                $newProperty = $this->properties[$property['supersededBy']];
+                if (! Property::where('name', $newProperty['name'])->first()) {
+                    
+                    // Update the deprecated property to new name 
+                    $propertyModel->name = $newProperty['name'];
+                    $propertyModel->save();
+                }
+                
+                // Dont update this deprecated property
                 continue;
             }
             
@@ -337,7 +370,7 @@ class SchemaImporter extends Command
             // Create or update the property
             $propertyModel = Property::updateOrCreate(
                 ['name' => $property['name']], 
-                ['comment' => $property['comment']]);
+                ['comment' => $property['comment'], 'version_id' => $this->version->id]);
             
             // Assing the property to its schemas
             $propSchemas = [];
