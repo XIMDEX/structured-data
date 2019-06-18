@@ -92,18 +92,23 @@ class SchemaImporter extends Command
         // Start a transaction
         $this->info('Starting database transaction');
         DB::beginTransaction();
-        
-        // Generate a new importing version
-        // $this->version = Version::create(['name' => $url]);
-        
-        // Process schemas
-        $this->processSchemas();
-        
-        // Create the heritable relations between schemas
-        $this->processSchemasRelations();
-        
-        // Create the schemas properties
-        $this->processProperties();
+        try {
+            
+            // Generate a new importing version
+            $this->version = Version::create(['name' => $url]);
+            
+            // Process schemas
+            $this->processSchemas();
+            
+            // Create the heritable relations between schemas
+            $this->processSchemasRelations();
+            
+            // Create the schemas properties
+            $this->processProperties();
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+            return 4;
+        }
         
         // Commit and close transaction
         $this->info('Closing database transaction');
@@ -152,7 +157,6 @@ class SchemaImporter extends Command
         if (! isset($data['@graph'])) {
             throw new \Exception('URL does not contain schemas information');
         }
-        $replaced = [];
         $this->schemas = [];
         $this->properties = [];
         foreach ($data['@graph'] as $element) {
@@ -169,17 +173,6 @@ class SchemaImporter extends Command
                 // Element is a property type
                 $property = $this->retrieveElementData($element);
                 
-                // May property is superseded by another one, avoid its creation
-                if (isset($element['http://schema.org/supersededBy'])) {
-                    $supersededBy = $this->retrieveElements($element['http://schema.org/supersededBy']);
-                    if (array_key_exists($supersededBy[0], $this->properties)) {
-                        $this->properties[$supersededBy[0]]['replaces'] = $property['name'];
-                    } else {
-                        $replaced[$supersededBy[0]] = $property['name'];
-                    }
-                    continue;
-                }
-                
                 // Schemas using this property
                 if (isset($element['http://schema.org/domainIncludes'])) {
                     $property['schemas'] = $this->retrieveElements($element['http://schema.org/domainIncludes']);
@@ -190,9 +183,10 @@ class SchemaImporter extends Command
                     $property['types'] = $this->retrieveElements($element['http://schema.org/rangeIncludes']);
                 }
                 
-                // If this property replaces another one, 
-                if (array_key_exists($element['@id'], $replaced)) {
-                    $property['replaces'] = $replaced[$element['@id']];
+                // May property is superseded by another one
+                if (isset($element['http://schema.org/supersededBy'])) {
+                    $supersededBy = $this->retrieveElements($element['http://schema.org/supersededBy']);
+                    $property['supersededBy'] = $supersededBy[0];
                 }
                 $this->properties[$element['@id']] = $property;
             }
@@ -253,7 +247,7 @@ class SchemaImporter extends Command
             // Create or update the schema
             $schemaModel = Schema::updateOrCreate(
                 ['name' => $schema['name']],
-                ['comment' => $schema['comment']]
+                ['comment' => $schema['comment'], 'version_id' => $this->version->id]
             );
             $schema['id'] = $schemaModel->id;
             $bar->advance();
@@ -291,7 +285,9 @@ class SchemaImporter extends Command
                     $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['name']} schema";
                     continue;
                 }
-                $inheritedSchemas[] = $this->schemas[$schemaId]['id'];
+                $inheritedSchemas[$this->schemas[$schemaId]['id']] = [
+                    'version_id' => $this->version->id
+                ];
             }
             Schema::findOrFail($schema['id'])->inheritedSchemas()->syncWithoutDetaching($inheritedSchemas);
             $bar->advance();
@@ -322,6 +318,12 @@ class SchemaImporter extends Command
         $errors = [];
         foreach ($this->properties as $property) {
 
+            // This property is superseded by another one
+            if (! array_key_exists('supersededBy', $property)) {
+                
+                continue;
+            }
+            
             // Check the schemas and values given
             if (! array_key_exists('schemas', $property)) {
                 $errors[] = "Property {$property['name']} does not provide a schema to assing";
@@ -347,9 +349,11 @@ class SchemaImporter extends Command
                     }
                     
                     // Create the relation between the schema and property if not exists
-                    $propSchemas[] = PropertySchema::firstOrCreate([
+                    $propSchemas[] = PropertySchema::updateOrCreate([
                         'schema_id' => $this->schemas[$schemaId]['id'], 
                         'property_id' => $propertyModel->id
+                    ], [
+                        'version_id' => $this->version->id
                     ]);
                 }
             }
@@ -378,6 +382,8 @@ class SchemaImporter extends Command
                         'type' => $type, 
                         'schema_id' => $schemaId, 
                         'property_schema_id' => $propSchema->id
+                    ], [
+                        'version_id' => $this->version->id
                     ]);
                 }
             }

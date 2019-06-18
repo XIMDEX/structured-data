@@ -11,7 +11,7 @@ class PropertySchema extends Model
     
     public $appends = ['name', 'comment', 'schema_name', 'types'];
     
-    public $fillable = ['name', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id'];
+    public $fillable = ['name', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id', 'version_id'];
     
     public static $except = ['schema_id', 'property_id'];
     

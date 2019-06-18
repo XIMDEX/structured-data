@@ -6,7 +6,7 @@ use Ximdex\StructuredData\Core\Model;
 
 class Property extends Model
 {
-    public $fillable = ['name', 'comment'];
+    public $fillable = ['name', 'comment', 'version_id'];
     
     public function schemaProperties()
     {

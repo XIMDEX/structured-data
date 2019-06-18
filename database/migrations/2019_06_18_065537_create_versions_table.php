@@ -42,6 +42,12 @@ class CreateVersionsTable extends Migration
                 ->references('id')->on("{$this->baseName}versions")
                 ->onDelete('restrict')->onUpdate('cascade');
         });
+        Schema::table("{$this->baseName}hereditable_schemas", function (Blueprint $table) {
+            $table->unsignedBigInteger('version_id')->nullable()->after('priority');
+            $table->foreign('version_id')
+                ->references('id')->on("{$this->baseName}versions")
+                ->onDelete('restrict')->onUpdate('cascade');
+        });
     }
 
     /**
@@ -65,6 +71,10 @@ class CreateVersionsTable extends Migration
         });
         Schema::table("{$this->baseName}available_types", function (Blueprint $table) {
             $table->dropForeign("{$this->baseName}available_types_version_id_foreign");
+            $table->dropColumn('version_id');
+        });
+        Schema::table("{$this->baseName}hereditable_schemas", function (Blueprint $table) {
+            $table->dropForeign("{$this->baseName}hereditable_schemas_version_id_foreign");
             $table->dropColumn('version_id');
         });
         Schema::dropIfExists("{$this->baseName}versions");

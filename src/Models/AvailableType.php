@@ -34,7 +34,7 @@ class AvailableType extends Model
     
     public $appends = ['schema_name'];
     
-    public $fillable = ['schema_id', 'property_schema_id', 'type'];
+    public $fillable = ['schema_id', 'property_schema_id', 'type', 'version_id'];
     
     public static $except = ['property_schema_id'];
     
