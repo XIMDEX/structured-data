@@ -8,9 +8,24 @@ class Schema extends Model
 {
     const THING_TYPE = 'Thing';
     
-    public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties'];
+    public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties', 'version_id', 'version'];
     
     public $fillable = ['name', 'comment', 'version_id'];
+    
+    public $appends = ['version_tag'];
+    
+    public function getVersionTagAttribute(): ?string
+    {
+        if ($this->version) {
+            return $this->version->tag;
+        }
+        return null;
+    }
+    
+    public function version()
+    {
+        return $this->belongsTo(Version::class);
+    }
     
     /**
      * Retrieve only the properties specified for this schema

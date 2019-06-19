@@ -30,9 +30,9 @@ class AvailableType extends Model
         self::TIME_TYPE
     ];
     
-    public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema'];
+    public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema', 'version_id', 'version'];
     
-    public $appends = ['schema_name'];
+    public $appends = ['schema_name', 'version_tag'];
     
     public $fillable = ['schema_id', 'property_schema_id', 'type', 'version_id'];
     
@@ -44,6 +44,19 @@ class AvailableType extends Model
             return $this->schema->name;
         }
         return null;
+    }
+    
+    public function getVersionTagAttribute(): ?string
+    {
+        if ($this->version) {
+            return $this->version->tag;
+        }
+        return null;
+    }
+    
+    public function version()
+    {
+        return $this->belongsTo(Version::class);
     }
     
     public function schema()

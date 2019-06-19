@@ -7,9 +7,9 @@ use Ximdex\StructuredData\Core\Model;
 
 class PropertySchema extends Model
 {
-    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes'];
+    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes', 'version_id', 'schema_id', 'version'];
     
-    public $appends = ['name', 'comment', 'schema_name', 'types'];
+    public $appends = ['name', 'comment', 'schema_name', 'version_tag', 'types'];
     
     public $fillable = ['name', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id', 'version_id'];
     
@@ -35,6 +35,14 @@ class PropertySchema extends Model
     {
         if ($this->schema_id) {
             return $this->schema->name;
+        }
+        return null;
+    }
+
+    public function getVersionTagAttribute(): ?string
+    {
+        if ($this->version) {
+            return $this->version->tag;
         }
         return null;
     }
@@ -73,6 +81,11 @@ class PropertySchema extends Model
     public function availableTypes()
     {
         return $this->hasMany(AvailableType::class);
+    }
+    
+    public function version()
+    {
+        return $this->belongsTo(Version::class);
     }
     
     /**
