@@ -22,6 +22,11 @@ class Schema extends Model
         return null;
     }
     
+    /**
+     * Return the version for this schema
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function version()
     {
         return $this->belongsTo(Version::class);
@@ -34,19 +39,35 @@ class Schema extends Model
      */
     public function mainProperties()
     {
-        return $this->hasMany(PropertySchema::class);
+        $result = $this->hasMany(PropertySchema::class);
+        if (Version::getLatest()) {
+            
+            // Get the latest version of schema properties with custom user ones
+            $result->where(function ($query) { 
+                $query->whereRaw('version_id IS NULL OR version_id = ?', Version::getLatest()); 
+            });
+        }
+        return $result;
     }
     
     /**
      * Retrieve the parent schemas for the current one (only one level)
      * 
+     * @param int $version
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function inheritedSchemas()
+    public function inheritedSchemas(int $version = null)
     {
-        return $this->belongsToMany(static::class, (new HereditableSchema())->getTable(), null, 'parent_schema_id')
-            ->withPivot('priority')
-            ->orderBy('priority');
+        $result = $this->belongsToMany(static::class, (new HereditableSchema())->getTable(), null, 'parent_schema_id');
+        if (Version::getLatest()) {
+            
+            // Get the latest version of inherited schemas with custom user ones
+            $result->where(function ($query) {
+                $table = (new HereditableSchema())->getTable();
+                $query->whereRaw($table . '.version_id IS NULL OR ' . $table . '.version_id = ?', Version::getLatest());
+            });
+        }
+        return $result->withPivot('priority')->orderBy('priority');
     }
     
     /**

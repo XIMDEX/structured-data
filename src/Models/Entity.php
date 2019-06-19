@@ -14,7 +14,6 @@ class Entity extends Model
     
     protected $appends = ['schema_url', 'schema_name'];
     
-    
     public function getSchemaUrlAttribute(): string
     {
         return route('linked-data.' . config('structureddata.api.routes.load-entity') . '.show', ['entity' => $this->id]);

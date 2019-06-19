@@ -14,7 +14,7 @@ class SchemaController extends Controller
     
     public function show(Schema $schema)
     {
-        $schema->inheritedSchemas;
+        $schema->inheritedSchemas();
         $schema['properties'] = $schema->properties();
         return response()->json($schema);
     }

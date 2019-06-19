@@ -7,7 +7,8 @@ use Ximdex\StructuredData\Core\Model;
 
 class PropertySchema extends Model
 {
-    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes', 'version_id', 'schema_id', 'version'];
+    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes', 'version_id', 'schema_id', 'version'
+        , 'id'];
     
     public $appends = ['name', 'comment', 'schema_name', 'version_tag', 'types'];
     
@@ -80,7 +81,15 @@ class PropertySchema extends Model
     
     public function availableTypes()
     {
-        return $this->hasMany(AvailableType::class);
+        $result = $this->hasMany(AvailableType::class);
+        if (Version::getLatest()) {
+            
+            // Get the latest version of property available types with custom user ones
+            $result->where(function ($query) {
+                $query->whereRaw('version_id IS NULL OR version_id = ?', Version::getLatest());
+            });
+        }
+        return $result;
     }
     
     public function version()
