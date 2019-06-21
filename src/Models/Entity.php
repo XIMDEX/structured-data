@@ -125,6 +125,7 @@ class Entity extends Model
     
     protected function entityToSchema(bool $uid = false, int $depth = null, array & $entities = []): array
     {
+        $properties = [];
         if (in_array($this->id, $entities) === false) {
             
             // This entity will never be shown in later levels
@@ -175,14 +176,27 @@ class Entity extends Model
                     $entityValue = $value->value;
                 }
             }
+            /*
             $maxCardinality = $value->availableType->propertySchema->max_cardinality;
             if ($maxCardinality === null or $maxCardinality > 1) {
+            */
+            if (array_key_exists($property, $object)) {
+                
+                // If the property is already setted, an array will be used adding current value
+                if (! in_array($property, $properties)) {
+                    $object[$property] = [$object[$property]];
+                    $properties[] = $property;
+                }
                 $object[$property][] = $entityValue;
             } else {
+                
+                // Property with a single value
                 $object[$property] = $entityValue;
             }
             $propertiesOrder[$property] = $order;
         }
+        
+        // Sort properties by order attribute
         array_multisort($propertiesOrder, $object);
         return $object;
     }

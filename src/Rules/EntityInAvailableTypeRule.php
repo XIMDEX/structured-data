@@ -60,6 +60,6 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
         if (! $this->availableType) {
             return parent::message();
         }
-        return "The :attribute must be a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
+        return "The :attribute value must be a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
     }
 }
