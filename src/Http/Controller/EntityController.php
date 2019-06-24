@@ -17,7 +17,12 @@ class EntityController extends Controller
     
     public function show(Entity $entity)
     {
-        return response()->json($entity->toJsonLD(Request::has('extra')));
+        if (Request::get('show')) {
+            $show = explode(',', Request::get('show'));
+        } else {
+            $show = [];
+        }
+        return response()->json($entity->toJsonLD($show));
     }
     
     public function store(EntityRequest $request)

@@ -9,7 +9,6 @@ class PropertySchemaController extends Controller
 {
     public function avaliableTypes(PropertySchema $propSchema)
     {
-        // $propSchema = PropertySchema::findOrFail($id);
         return response()->json($propSchema->availableTypes);
     }
     
