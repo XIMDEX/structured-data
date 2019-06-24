@@ -30,7 +30,7 @@ class AvailableType extends Model
         self::TIME_TYPE
     ];
     
-    public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema', 'version_id', 'version'];
+    public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema', 'version'];
     
     public $appends = ['schema_name', 'version_tag'];
     

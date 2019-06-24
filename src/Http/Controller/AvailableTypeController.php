@@ -20,12 +20,12 @@ class AvailableTypeController extends Controller
     
     public function store(AvailableTypeRequest $request)
     {
-        AvailableType::create($request->all());
+        return AvailableType::create($request->all());
     }
     
     public function update(AvailableTypeRequest $request, AvailableType $availableType)
     {
-        $availableType->update($request->all());
+        return $availableType->update($request->all());
     }
     
     public function destroy(AvailableType $availableType)

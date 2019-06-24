@@ -8,7 +8,7 @@ class Schema extends Model
 {
     const THING_TYPE = 'Thing';
     
-    public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties', 'version_id', 'version'];
+    public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties', 'version'];
     
     public $fillable = ['name', 'comment', 'version_id'];
     
@@ -43,7 +43,7 @@ class Schema extends Model
         if (Version::getLatest()) {
             
             // Get the latest version of schema properties with custom user ones
-            $result->where(function ($query) { 
+            $result->where(function ($query) {
                 $query->whereRaw('version_id IS NULL OR version_id = ?', Version::getLatest()); 
             });
         }
@@ -53,10 +53,9 @@ class Schema extends Model
     /**
      * Retrieve the parent schemas for the current one (only one level)
      * 
-     * @param int $version
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function inheritedSchemas(int $version = null)
+    public function inheritedSchemas()
     {
         $result = $this->belongsToMany(static::class, (new HereditableSchema())->getTable(), null, 'parent_schema_id');
         if (Version::getLatest()) {
@@ -93,5 +92,25 @@ class Schema extends Model
             $properties = $properties->merge($schema->properties($schemas)->sortBy('order'));
         }
         return $properties->unique('name');
+    }
+    
+    /**
+     * Check if this schema has an inheritance relation with the schema given
+     * 
+     * @param Schema $schema
+     * @return bool
+     */
+    public function extends(Schema $schema): bool
+    {
+        if ($this->id == $schema->id) {
+            return true;
+        }
+        foreach ($this->inheritedSchemas as $inheritedSchema) {
+            if ($inheritedSchema->id == $schema->id) {
+                return true;
+            }
+            return $inheritedSchema->extends($schema);
+        }
+        return false;
     }
 }

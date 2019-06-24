@@ -31,6 +31,7 @@ class TypeAllowedInPropertyRule implements Rule
      */
     public function message()
     {
-        return "The :attribute is not an allowed type (used for {$this->availableType->propertySchema->name} property)";
+        return "The :attribute is not an allowed type (used for {$this->availableType->propertySchema->name}"
+            . " in @{$this->availableType->propertySchema->schema_name})";
     }
 }

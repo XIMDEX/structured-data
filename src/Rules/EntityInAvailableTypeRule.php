@@ -24,11 +24,13 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
             // Type only support an entity
             return $this->supportMultiValidation;
         }
+        /*
         if ($this->availableType->schema_id == Schema::THING_TYPE) {
             
             // If the schema type is Thing every schema is valid for entity value
             return true;
         }
+        */
         foreach ($value as $id) {
             
             // If value contains the type, get only the value given
@@ -42,9 +44,9 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
             if (! $entity) {
                 return false;
             }
-            if ($entity->schema_id != $this->availableType->schema_id) {
-                
-                // The schema for the given entity is different for this available type
+            if (! $entity->schema->extends($this->availableType->schema)) {
+
+                // The schemas for the given entity are not supported for this available type
                 return false;
             }
         }
@@ -60,6 +62,6 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
         if (! $this->availableType) {
             return parent::message();
         }
-        return "The :attribute value must be a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
+        return "The :attribute value must be or extends a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
     }
 }

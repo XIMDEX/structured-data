@@ -25,7 +25,7 @@ class PropertySchemaController extends Controller
     
     public function store(PropertySchemaRequest $request)
     {
-        PropertySchema::create($request->all());
+        return PropertySchema::create($request->all());
     }
     
     public function update(PropertySchemaRequest $request, PropertySchema $propSchema)
@@ -35,7 +35,7 @@ class PropertySchemaController extends Controller
             // New property name was given
             $propSchema->property_id = null;
         }
-        $propSchema->update($request->all());
+        return $propSchema->update($request->all());
     }
     
     public function destroy(PropertySchema $propSchema)

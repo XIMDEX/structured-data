@@ -148,7 +148,7 @@ class Entity extends Model
                     // No entity defined for this value !
                     continue;
                 }
-                if ($value->referenceEntity->schema_id != $value->availableType->schema_id) {
+                if (! $value->referenceEntity->schema->extends($value->availableType->schema)) {
                     
                     // Schema for entity is different to property type !
                     continue;
@@ -159,9 +159,9 @@ class Entity extends Model
                     $referenceEntity = $value->referenceEntity->reference();
                 } else {
                     $referenceEntity = $value->referenceEntity->entityToSchema(false, $depth - 1, $entities);
-                    if ($uid) {
-                        $referenceEntity['@uid'] = $value->id;
-                    }
+                }
+                if ($uid) {
+                    $referenceEntity['@uid'] = $value->id;
                 }
                 if (! $referenceEntity) {
                     
@@ -171,7 +171,7 @@ class Entity extends Model
                 $entityValue = $referenceEntity;
             } else {
                 if ($uid) {
-                    $entityValue = ['@uid' => $value->id, '@value' => $value->value];
+                    $entityValue = ['@uid' => $value->id, '@type' => $value->available_type_id, '@values' => $value->value];
                 } else {
                     $entityValue = $value->value;
                 }
