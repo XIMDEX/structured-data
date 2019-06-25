@@ -214,6 +214,14 @@ class Entity extends Model
         return $object;
     }
     
+    /**
+     * Return an array with some extra information
+     * 
+     * @param Value $value
+     * @param array $show
+     * @param array $data
+     * @return string|array
+     */
     private function addExtraInfoToValue(Value $value, array $show, array $data = null)
     {
         if ($data === null) {

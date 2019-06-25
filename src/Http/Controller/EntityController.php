@@ -10,6 +10,8 @@ use Ximdex\StructuredData\Requests\EntityRequest;
 
 class EntityController extends Controller
 {
+    const RDF_FORMAT = 'rdf';
+    
     public function index()
     {
         return response()->json(Entity::all());
@@ -22,7 +24,15 @@ class EntityController extends Controller
         } else {
             $show = [];
         }
-        return response()->json($entity->toJsonLD($show));
+        $result = $entity->toJsonLD($show);
+        if (Request::get('format') == self::RDF_FORMAT) {
+            $graph = new \EasyRdf_Graph();
+            $graph->parse(json_encode($result), 'jsonld');
+            $format = \EasyRdf_Format::getFormat('rdfxml');
+            $result = $graph->serialise($format);
+            return response($result, 200, ['Content-Type' => 'application/xml']);
+        }
+        return response()->json($result);
     }
     
     public function store(EntityRequest $request)
