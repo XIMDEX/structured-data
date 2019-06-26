@@ -35,6 +35,11 @@ Route::group([
         Route::apiResource(config('structureddata.api.routes.load-entity'), config('structureddata.controllersNamespace') 
             . '\EntityController');
         
+        // Load the entities for a reference node
+        Route::get(config('structureddata.api.routes.validate-entity') . '/{entity}', [
+            'as' => 'validate',
+            'uses' => config('structureddata.controllersNamespace') . '\EntityController@validation']);
+        
         // ENTITY VALUES ...
         
         // Bind entity value

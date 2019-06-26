@@ -9,7 +9,8 @@ return [
         'schema' => 'schema',
         'available-type' => 'available-types',
         'property-schema' => 'property-schema',
-        'schemas-import' => 'schemas-import'
+        'schemas-import' => 'schemas-import',
+        'validate-entity' => 'validate'
     ],
     'middleware' => [
         'base' => 'api',

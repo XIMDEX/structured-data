@@ -167,11 +167,13 @@ class Entity extends Model
                     // No entity defined for this value !
                     continue;
                 }
+                /*
                 if (! $value->referenceEntity->schema->extends($value->availableType->schema)) {
                     
                     // Schema for entity is different to property type !
                     continue;
                 }
+                */
                 if (in_array($value->ref_entity_id, $entities) !== false || $depth === 0) {
                     
                     // We dont continue if the entity has been showed before
