@@ -18,24 +18,24 @@ class CreateValuesTable extends Migration
             // Fields
             $table->bigIncrements('id');
             $table->unsignedBigInteger('available_type_id');
-            $table->unsignedBigInteger('entity_id');
-            $table->unsignedBigInteger('ref_entity_id')->nullable();
+            $table->unsignedBigInteger('item_id');
+            $table->unsignedBigInteger('ref_item_id')->nullable();
             $table->text('value')->nullable();
             $table->unsignedSmallInteger('position')->default(1);
             $table->timestamps();
             
             // Indexes
-            $table->unique(['available_type_id', 'entity_id', 'ref_entity_id'], 'unique_entity_value');
+            $table->unique(['available_type_id', 'item_id', 'ref_item_id'], 'unique_item_value');
             
             // Relations
             $table->foreign('available_type_id')
                 ->references('id')->on("{$this->baseName}available_types")
                 ->onDelete('restrict')->onUpdate('cascade');
-            $table->foreign('entity_id')
-                ->references('id')->on("{$this->baseName}entities")
+            $table->foreign('item_id')
+                ->references('id')->on("{$this->baseName}items")
                 ->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('ref_entity_id')
-                ->references('id')->on("{$this->baseName}entities")
+            $table->foreign('ref_item_id')
+                ->references('id')->on("{$this->baseName}items")
                 ->onDelete('restrict')->onUpdate('cascade');
         });
     }

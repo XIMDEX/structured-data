@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateEntityNodesTable extends Migration
+class CreateItemNodesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,22 +13,22 @@ class CreateEntityNodesTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}entity_nodes", function (Blueprint $table) {
+        Schema::create("{$this->baseName}item_nodes", function (Blueprint $table) {
             
             // Fields
             $table->unsignedBigInteger('node_id');
-            $table->unsignedBigInteger('entity_id');
+            $table->unsignedBigInteger('item_id');
             $table->timestamps();
             
             // Indexes
-            $table->primary(['node_id', 'entity_id']);
+            $table->primary(['node_id', 'item_id']);
             
             // Relations
             $table->foreign('node_id')
                 ->references('id')->on("{$this->baseName}nodes" )
                 ->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('entity_id')
-                ->references('id')->on("{$this->baseName}entities")
+            $table->foreign('item_id')
+                ->references('id')->on("{$this->baseName}items")
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }
@@ -40,6 +40,6 @@ class CreateEntityNodesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}entity_nodes");
+        Schema::dropIfExists("{$this->baseName}item_nodes");
     }
 }

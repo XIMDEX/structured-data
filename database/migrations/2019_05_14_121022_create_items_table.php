@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateSchemasTable extends Migration
+class CreateItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,17 @@ class CreateSchemasTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}schemas", function (Blueprint $table) {
+        Schema::create("{$this->baseName}items", function (Blueprint $table) {
             
             // Fields
             $table->bigIncrements('id');
-            $table->char('name', 50)->unique();
-            $table->text('comment')->nullable();
+            $table->unsignedBigInteger('class_id');
             $table->timestamps();
+            
+            // Relations
+            $table->foreign('class_id')
+                ->references('id')->on("{$this->baseName}classes")
+                ->onDelete('restrict')->onUpdate('cascade');
         });
     }
 
@@ -30,6 +34,6 @@ class CreateSchemasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}schemas");
+        Schema::dropIfExists("{$this->baseName}items");
     }
 }

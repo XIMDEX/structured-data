@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateEntitiesTable extends Migration
+class CreateClassesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,13 @@ class CreateEntitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}entities", function (Blueprint $table) {
+        Schema::create("{$this->baseName}classes", function (Blueprint $table) {
             
             // Fields
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('schema_id');
+            $table->char('label', 50)->unique();
+            $table->text('comment')->nullable();
             $table->timestamps();
-            
-            // Relations
-            $table->foreign('schema_id')
-                ->references('id')->on("{$this->baseName}schemas")
-                ->onDelete('restrict')->onUpdate('cascade');
         });
     }
 
@@ -34,6 +30,6 @@ class CreateEntitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}entities");
+        Schema::dropIfExists("{$this->baseName}classes");
     }
 }

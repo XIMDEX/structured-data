@@ -17,7 +17,7 @@ class CreatePropertiesTable extends Migration
             
             // Fields
             $table->bigIncrements('id');
-            $table->char('name', 50)->unique();
+            $table->char('label', 50)->unique();
             $table->text('comment')->nullable();
             $table->timestamps();
         });

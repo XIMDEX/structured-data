@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateHereditableSchemasTable extends Migration
+class CreateSubclassOfTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,22 +13,22 @@ class CreateHereditableSchemasTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}hereditable_schemas", function (Blueprint $table) {
+        Schema::create("{$this->baseName}subclass_of", function (Blueprint $table) {
             
             // Fields
-            $table->unsignedBigInteger('schema_id');
-            $table->unsignedBigInteger('parent_schema_id');
+            $table->unsignedBigInteger('class_id');
+            $table->unsignedBigInteger('parent_class_id');
             $table->unsignedTinyInteger('priority')->default(1);
             $table->timestamps();
             
             // Indexes
-            $table->primary(['schema_id', 'parent_schema_id']);
+            $table->primary(['class_id', 'parent_class_id']);
             
-            $table->foreign('schema_id')
-                ->references('id')->on("{$this->baseName}schemas")
+            $table->foreign('class_id')
+                ->references('id')->on("{$this->baseName}classes")
                 ->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('parent_schema_id')
-                ->references('id')->on("{$this->baseName}schemas")
+            $table->foreign('parent_class_id')
+                ->references('id')->on("{$this->baseName}classes")
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }
@@ -40,6 +40,6 @@ class CreateHereditableSchemasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}hereditable_schemas");
+        Schema::dropIfExists("{$this->baseName}subclass_of");
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreatePropertySchemasTable extends Migration
+class CreatePropertyClassesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreatePropertySchemasTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}property_schemas", function (Blueprint $table) {
+        Schema::create("{$this->baseName}property_classes", function (Blueprint $table) {
             
             // Fields
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('schema_id');
+            $table->unsignedBigInteger('class_id');
             $table->unsignedBigInteger('property_id');
             $table->unsignedSmallInteger('min_cardinality')->default(0);
             $table->unsignedSmallInteger('max_cardinality')->nullable()->default(null);
@@ -26,11 +26,11 @@ class CreatePropertySchemasTable extends Migration
             $table->timestamps();
             
             // Indexes
-            $table->unique(['schema_id', 'property_id']);
+            $table->unique(['class_id', 'property_id']);
             
             // Relations
-            $table->foreign('schema_id')
-                ->references('id')->on("{$this->baseName}schemas")
+            $table->foreign('class_id')
+                ->references('id')->on("{$this->baseName}classes")
                 ->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('property_id')
                 ->references('id')->on("{$this->baseName}properties")
@@ -45,6 +45,6 @@ class CreatePropertySchemasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}property_schemas");
+        Schema::dropIfExists("{$this->baseName}property_classes");
     }
 }
