@@ -21,10 +21,10 @@ class CreateVersionsTable extends Migration
         });
         
         // Schemas version
-        Schema::table("{$this->baseName}classes", function (Blueprint $table) {
+        Schema::table("{$this->baseName}schemas", function (Blueprint $table) {
             $table->unsignedBigInteger('version_id')->nullable()->after('comment');
             $table->foreign('version_id')
-                ->references('id')->on("{$this->baseName}versions")
+                ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('restrict')->onUpdate('cascade');
         });
         
@@ -37,7 +37,7 @@ class CreateVersionsTable extends Migration
         });
         
         // Relation between schemas and properties version
-        Schema::table("{$this->baseName}property_classes", function (Blueprint $table) {
+        Schema::table("{$this->baseName}property_schemas", function (Blueprint $table) {
             $table->unsignedBigInteger('version_id')->nullable()->after('default_value');
             $table->foreign('version_id')
                 ->references('id')->on("{$this->baseName}versions")
@@ -69,8 +69,8 @@ class CreateVersionsTable extends Migration
     public function down()
     {
         // Schemas version
-        Schema::table("{$this->baseName}classes", function (Blueprint $table) {
-            $table->dropForeign("{$this->baseName}classes_version_id_foreign");
+        Schema::table("{$this->baseName}schemas", function (Blueprint $table) {
+            $table->dropForeign("{$this->baseName}schemas_version_id_foreign");
             $table->dropColumn('version_id');
         });
         
@@ -81,8 +81,8 @@ class CreateVersionsTable extends Migration
         });
         
         // Relation between schemas and properties version
-        Schema::table("{$this->baseName}property_classes", function (Blueprint $table) {
-            $table->dropForeign("{$this->baseName}property_classes_version_id_foreign");
+        Schema::table("{$this->baseName}property_schemas", function (Blueprint $table) {
+            $table->dropForeign("{$this->baseName}property_schemas_version_id_foreign");
             $table->dropColumn('version_id');
         });
         

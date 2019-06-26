@@ -17,12 +17,12 @@ class CreateItemsTable extends Migration
             
             // Fields
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('class_id');
+            $table->unsignedBigInteger('schema_id');
             $table->timestamps();
             
             // Relations
-            $table->foreign('class_id')
-                ->references('id')->on("{$this->baseName}classes")
+            $table->foreign('schema_id')
+                ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('restrict')->onUpdate('cascade');
         });
     }

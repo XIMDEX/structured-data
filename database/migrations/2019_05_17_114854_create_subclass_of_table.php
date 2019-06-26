@@ -16,19 +16,19 @@ class CreateSubclassOfTable extends Migration
         Schema::create("{$this->baseName}subclass_of", function (Blueprint $table) {
             
             // Fields
-            $table->unsignedBigInteger('class_id');
-            $table->unsignedBigInteger('parent_class_id');
+            $table->unsignedBigInteger('schema_id');
+            $table->unsignedBigInteger('parent_schema_id');
             $table->unsignedTinyInteger('priority')->default(1);
             $table->timestamps();
             
             // Indexes
-            $table->primary(['class_id', 'parent_class_id']);
+            $table->primary(['schema_id', 'parent_schema_id']);
             
-            $table->foreign('class_id')
-                ->references('id')->on("{$this->baseName}classes")
+            $table->foreign('schema_id')
+                ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('parent_class_id')
-                ->references('id')->on("{$this->baseName}classes")
+            $table->foreign('parent_schema_id')
+                ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }

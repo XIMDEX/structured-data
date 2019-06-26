@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateClassesTable extends Migration
+class CreateSchemasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateClassesTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}classes", function (Blueprint $table) {
+        Schema::create("{$this->baseName}schemas", function (Blueprint $table) {
             
             // Fields
             $table->bigIncrements('id');
@@ -30,6 +30,6 @@ class CreateClassesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}classes");
+        Schema::dropIfExists("{$this->baseName}schemas");
     }
 }
