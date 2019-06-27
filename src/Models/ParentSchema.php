@@ -4,7 +4,7 @@ namespace Ximdex\StructuredData\Models;
 
 use Ximdex\StructuredData\Core\Model;
 
-class HereditableSchema extends Model
+class ParentSchema extends Model
 {
     public $fillable = ['priority', 'version_id'];
     

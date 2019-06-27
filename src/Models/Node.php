@@ -8,6 +8,6 @@ class Node extends Model
 {
     public function entities()
     {
-        return $this->belongsToMany(Entity::class, (new EntityNode)->getTable());
+        return $this->belongsToMany(Item::class, (new ItemNode)->getTable());
     }
 }

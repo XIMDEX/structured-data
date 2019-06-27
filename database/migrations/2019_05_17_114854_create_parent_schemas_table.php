@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ximdex\StructuredData\Core\Migration;
 
-class CreateSubclassOfTable extends Migration
+class CreateParentSchemasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateSubclassOfTable extends Migration
      */
     public function up()
     {
-        Schema::create("{$this->baseName}subclass_of", function (Blueprint $table) {
+        Schema::create("{$this->baseName}parent_schemas", function (Blueprint $table) {
             
             // Fields
             $table->unsignedBigInteger('schema_id');
@@ -24,6 +24,7 @@ class CreateSubclassOfTable extends Migration
             // Indexes
             $table->primary(['schema_id', 'parent_schema_id']);
             
+            // Relations
             $table->foreign('schema_id')
                 ->references('id')->on("{$this->baseName}schemas")
                 ->onDelete('cascade')->onUpdate('cascade');
@@ -40,6 +41,6 @@ class CreateSubclassOfTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists("{$this->baseName}subclass_of");
+        Schema::dropIfExists("{$this->baseName}parent_schemas");
     }
 }

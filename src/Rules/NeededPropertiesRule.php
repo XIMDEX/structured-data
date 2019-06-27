@@ -25,8 +25,8 @@ class NeededPropertiesRule implements Rule
     public function passes($attribute, $value)
     {
         foreach ($this->schema->properties() as $property) {
-            if ($property->min_cardinality == 1 and ! isset($value[$property->name])) {
-                $this->property = $property->name;
+            if ($property->min_cardinality == 1 and ! isset($value[$property->label])) {
+                $this->property = $property->label;
                 return false;
             }
         }
@@ -39,6 +39,6 @@ class NeededPropertiesRule implements Rule
      */
     public function message()
     {
-        return "Some properties (like {$this->property}) are needed for given schema @{$this->schema->name}";
+        return "Some properties (like {$this->property}) are needed for given schema @{$this->schema->label}";
     }
 }

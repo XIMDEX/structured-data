@@ -6,7 +6,7 @@ use Ximdex\StructuredData\Core\Model;
 
 class Property extends Model
 {
-    public $fillable = ['name', 'comment', 'version_id', 'version'];
+    public $fillable = ['label', 'comment', 'version_id', 'version'];
     
     public $hidden = ['version_id'];
     

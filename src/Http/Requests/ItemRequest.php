@@ -8,12 +8,12 @@ use Ximdex\StructuredData\Models\Schema;
 use Ximdex\StructuredData\Models\Value;
 use Ximdex\StructuredData\Rules\ValidPropertyRule;
 use Ximdex\StructuredData\Rules\ValueInAvailableTypeRule;
-use Ximdex\StructuredData\Rules\EntityInAvailableTypeRule;
+use Ximdex\StructuredData\Rules\ItemInAvailableTypeRule;
 use Ximdex\StructuredData\Rules\NeededPropertiesRule;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Rules\TypeAllowedInPropertyRule;
 
-class EntityRequest extends ApiRequest
+class ItemRequest extends ApiRequest
 {   
     /**
      * {@inheritDoc}
@@ -23,17 +23,12 @@ class EntityRequest extends ApiRequest
     {
         parent::rules();
         $method = Request::method();
-        if ($this->entity and $this->entity->schema_id) {
-            $schemaId = $this->entity->schema_id;
+        if ($this->item and $this->item->schema_id) {
+            $schemaId = $this->item->schema_id;
         } else {
             $schemaId = $this->get('schema_id');
         }
         switch ($method) {
-            
-            // show
-            case 'GET':
-                $this->addRule('uid', 'boolean');
-                break;
                 
             // store | update
             case 'POST':
@@ -58,14 +53,14 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.values.*.id', 'required_with:properties.*.values.*.value');
                 $this->addRule('properties.*.values.*.value', 'required_with:properties.*.values.*.id');
                 $this->addRule('properties.*.values.*.id', 'gte:1');
-                $this->addRule('properties.*.values.deleteAll', 'boolean');
+                $this->addRule('properties.*.values.delete', 'boolean');
                 $this->addRule('*', 'bail');
                 $this->addRule('schema_id', 'exists:' . (new Schema)->getTable() . ',id');
-                if ($this->entity and $this->entity->id) {
+                if ($this->item and $this->item->id) {
                     
-                    // The value must be present in the Values table and be associated to the entity to update
+                    // The value must be present in the Values table and be associated to the item to update
                     $this->addRule('delete', Rule::exists((new Value)->getTable(), 'id')->where(function ($query) {
-                        $query->where('entity_id', $this->entity->id);
+                        $query->where('item_id', $this->item->id);
                     }));
                 }
                 $this->addRule('properties.*.type', 'exists:' . (new AvailableType)->getTable() . ',id');
@@ -78,7 +73,7 @@ class EntityRequest extends ApiRequest
                 $this->addRule('properties.*.type', new TypeAllowedInPropertyRule());
                 $this->addRule('*', 'bail');
                 $this->addRule('properties.*', new ValueInAvailableTypeRule());
-                $this->addRule('properties.*', new EntityInAvailableTypeRule());
+                $this->addRule('properties.*', new ItemInAvailableTypeRule());
                 /*
                 $this->addRule('*', 'bail');
                 $this->addRule('properties.*', new MinCardinalityRule());

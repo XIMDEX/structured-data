@@ -32,7 +32,10 @@ abstract class InAvailableTypeRule implements Rule
     {
         if (isset($value['type']) and isset($value['values'])) {
             if (! $this->availableType or $this->availableType->id != $value['type']) {
-                $this->availableType = AvailableType::findOrFail($value['type']);
+                $this->availableType = AvailableType::find($value['type']);
+                if (! $this->availableType) {
+                    return false;
+                }
             }
             $this->value = $value['values'];
         } elseif (! $this->availableType) {

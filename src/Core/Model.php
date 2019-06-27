@@ -17,21 +17,24 @@ class Model extends BaseModel
         parent::__construct($attributes);
     }
     
-    public static function create($attributes)
+    public static function create(array $attributes = [])
     {
         return static::query()->create($attributes);
     }
     
+    /**
+     * {@inheritDoc}
+     * @see \Illuminate\Database\Eloquent\Model::update()
+     */
     public function update(array $attributes = [], array $options = [])
     {
         $attributes = Arr::except($attributes, static::$except);
-        parent::update($attributes, $options);
+        return parent::update($attributes, $options);
     }
     
     /**
-     * Get the table associated with the model.
-     *
-     * @return string
+     * {@inheritDoc}
+     * @see \Illuminate\Database\Eloquent\Model::getTable()
      */
     public function getTable()
     {

@@ -14,7 +14,7 @@ class SchemaController extends Controller
     
     public function show(Schema $schema)
     {
-        $schema->inheritedSchemas;
+        $schema->schemas;
         $schema['properties'] = $schema->properties();
         return response()->json($schema);
     }
@@ -26,19 +26,20 @@ class SchemaController extends Controller
     
     public function update(SchemaRequest $request, Schema $schema)
     {
-        $inheritedSchemas = $request->get('inherited_schemas', false);
-        if ($inheritedSchemas !== false) {
+        $schemas = $request->get('schemas', false);
+        if ($schemas !== false) {
             $syncSchemas = [];
-            foreach ($inheritedSchemas as $data) {
+            foreach ($schemas as $data) {
                 if (isset($data['priority'])) {
                     $syncSchemas[$data['id']] = ['priority' => (int) $data['priority']];
                 } else {
                     $syncSchemas[] = $data['id'];
                 }
             }
-            $schema->inheritedSchemas()->sync($syncSchemas);
+            $schema->schemas()->sync($syncSchemas);
         }
-        return $schema->update($request->all());
+        $schema->update($request->all());
+        return $schema;
     }
     
     public function destroy(Schema $schema)

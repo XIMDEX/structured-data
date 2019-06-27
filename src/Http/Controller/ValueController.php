@@ -24,7 +24,8 @@ class ValueController extends Controller
     
     public function update(ValueRequest $request, Value $value)
     {
-        return $value->update($request->all());
+        $value->update($request->all());
+        return $value;
     }
     
     public function destroy(Value $value)

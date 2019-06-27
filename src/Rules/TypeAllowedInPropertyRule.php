@@ -17,9 +17,12 @@ class TypeAllowedInPropertyRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $this->availableType = AvailableType::findOrFail($value);
+        $this->availableType = AvailableType::find($value);
+        if (! $this->availableType) {
+            return false;
+        }
         $data = explode('.', $attribute);
-        if ($data[1] != $this->availableType->propertySchema->name) {
+        if ($data[1] != $this->availableType->propertySchema->label) {
             return false;
         }
         return true;
@@ -31,7 +34,10 @@ class TypeAllowedInPropertyRule implements Rule
      */
     public function message()
     {
-        return "The :attribute is not an allowed type (used for {$this->availableType->propertySchema->name}"
-            . " in @{$this->availableType->propertySchema->schema_name})";
+        if (! $this->availableType) {
+            return null;
+        }
+        return "The :attribute is not an allowed type (used for {$this->availableType->propertySchema->label}"
+            . " in @{$this->availableType->propertySchema->schema_label})";
     }
 }

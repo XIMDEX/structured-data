@@ -4,9 +4,9 @@ namespace Ximdex\StructuredData\Requests;
 
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\AvailableType;
-use Ximdex\StructuredData\Models\Entity;
+use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Rules\ValueInAvailableTypeRule;
-use Ximdex\StructuredData\Rules\EntityInAvailableTypeRule;
+use Ximdex\StructuredData\Rules\ItemInAvailableTypeRule;
 
 class ValueRequest extends ApiRequest
 {
@@ -26,22 +26,22 @@ class ValueRequest extends ApiRequest
                 $this->addRule('available_type_id', 'numeric');
                 $this->addRule('available_type_id', 'gte:1');
                 $this->addRule('available_type_id', 'exists:' . (new AvailableType)->getTable() . ',id');
-                $this->addRule('entity_id', 'required');
-                $this->addRule('entity_id', 'numeric');
-                $this->addRule('entity_id', 'gte:1');
-                $this->addRule('entity_id', 'exists:' . (new Entity)->getTable() . ',id');
-                $this->addRule('value', 'required_without:ref_entity_id');
-                $this->addRule('ref_entity_id', 'required_without:value');
+                $this->addRule('item_id', 'required');
+                $this->addRule('item_id', 'numeric');
+                $this->addRule('item_id', 'gte:1');
+                $this->addRule('item_id', 'exists:' . (new Item)->getTable() . ',id');
+                $this->addRule('value', 'required_without:ref_item_id');
+                $this->addRule('ref_item_id', 'required_without:value');
             case 'PUT':
             case 'PATCH':
-                $this->addRule('ref_entity_id', 'numeric');
-                $this->addRule('ref_entity_id', 'gte:1');
-                $this->addRule('ref_entity_id', 'exists:' . (new Entity)->getTable() . ',id');
+                $this->addRule('ref_item_id', 'numeric');
+                $this->addRule('ref_item_id', 'gte:1');
+                $this->addRule('ref_item_id', 'exists:' . (new Item)->getTable() . ',id');
                 $this->addRule('position', 'numeric');
                 $this->addRule('position', 'gte:1');
                 $this->addRule('*', 'bail');
                 $this->addRule('value', new ValueInAvailableTypeRule($this->get('available_type_id')));
-                $this->addRule('ref_entity_id', new EntityInAvailableTypeRule($this->get('available_type_id')));
+                $this->addRule('ref_item_id', new ItemInAvailableTypeRule($this->get('available_type_id')));
         }
         return $this->validations;
     }

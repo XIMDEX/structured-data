@@ -21,12 +21,12 @@ class PropertySchemaRequest extends ApiRequest
             
             // store | update
             case 'POST':
-                $this->addRule('name', 'required_without:property_id');
-                $this->addRule('property_id', 'required_without:name');
+                $this->addRule('label', 'required_without:property_id');
+                $this->addRule('property_id', 'required_without:label');
                 $this->addRule('schema_id', 'required');
             case 'PUT':
             case 'PATCH':
-                $this->addRule('name', 'max:50');
+                $this->addRule('label', 'max:50');
                 $this->addRule('order', 'numeric');
                 $this->addRule('order', 'gte:1');
                 $this->addRule('schema_id', 'numeric');
@@ -49,7 +49,7 @@ class PropertySchemaRequest extends ApiRequest
                 $this->addRule('schema_id', new SchemaPropertyDuplicationRule(
                     $this->get('schema_id'), 
                     $this->get('property_id'),
-                    $this->get('name')
+                    $this->get('label')
                 ));
         }
         return $this->validations;

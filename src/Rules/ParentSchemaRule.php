@@ -5,7 +5,7 @@ namespace Ximdex\StructuredData\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Ximdex\StructuredData\Models\Schema;
 
-class SchemaInheritationRule implements Rule
+class ParentSchemaRule implements Rule
 {
     private $id;
     
@@ -30,10 +30,10 @@ class SchemaInheritationRule implements Rule
                 return false;
             }
             $schema = Schema::find($data['id']);
-            if ($schema->inheritedSchemas->isEmpty()) {
+            if ($schema->schemas->isEmpty()) {
                 continue;
             }
-            if ($this->passes($attribute, $schema->inheritedSchemas->toArray()) === false) {
+            if ($this->passes($attribute, $schema->schemas->toArray()) === false) {
                 return false;
             }
         }

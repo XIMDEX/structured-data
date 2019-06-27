@@ -12,11 +12,11 @@ class SchemaPropertyDuplicationRule implements Rule
     
     private $property;
     
-    public function __construct(int $schema = null, int $property = null, string $name = null)
+    public function __construct(int $schema = null, int $property = null, string $label = null)
     {
         $this->schema = $schema;
         if (! $property) {
-            if ($prop = Property::where('name', $name)->first()) {
+            if ($prop = Property::where('label', $label)->first()) {
                 $this->property = $prop->id;
             }
         } else {

@@ -9,16 +9,16 @@ class PropertySchema extends Model
 {
     public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes', 'schema_id', 'version'];
     
-    public $appends = ['name', 'comment', 'schema_name', 'version_tag', 'types'];
+    public $appends = ['label', 'comment', 'schema_label', 'version_tag', 'types'];
     
-    public $fillable = ['name', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id', 'version_id'];
+    public $fillable = ['label', 'min_cardinality', 'max_cardinality', 'default_value', 'order', 'schema_id', 'property_id', 'version_id'];
     
     public static $except = ['schema_id', 'property_id'];
     
-    public function getNameAttribute(): string
+    public function getLabelAttribute(): string
     {
         if ($this->property) {
-            return Str::camel($this->property->name);
+            return Str::camel($this->property->label);
         }
         return '';
     }
@@ -31,10 +31,10 @@ class PropertySchema extends Model
         return null;
     }
     
-    public function getSchemaNameAttribute() : ?string
+    public function getSchemaLabelAttribute() : ?string
     {
         if ($this->schema_id) {
-            return $this->schema->name;
+            return $this->schema->label;
         }
         return null;
     }
@@ -52,12 +52,12 @@ class PropertySchema extends Model
         return $this->availableTypes->toArray();
     }
     
-    public function setNameAttribute(string $name): void
+    public function setLabelAttribute(string $label): void
     {
         if (! $this->property) {
             $this->property = new Property();
         }
-        $this->property->name = Str::snake($name);
+        $this->property->label = Str::snake($label);
     }
     
     public function setCommentAttribute(string $comment = null): void
@@ -102,10 +102,10 @@ class PropertySchema extends Model
      */
     public function save(array $options = [])
     {
-        if (! $this->property_id and $this->name) {
+        if (! $this->property_id and $this->label) {
             
-            // Load property id for given property name, or create a new one
-            $property = Property::firstOrCreate(['name' => $this->name], ['comment' => $this->comment]);
+            // Load property id for given property label, or create a new one
+            $property = Property::firstOrCreate(['label' => $this->label], ['comment' => $this->comment]);
             $this->property_id = $property->id;
         }
         unset($this->property);

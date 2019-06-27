@@ -25,7 +25,8 @@ class AvailableTypeController extends Controller
     
     public function update(AvailableTypeRequest $request, AvailableType $availableType)
     {
-        return $availableType->update($request->all());
+        $availableType->update($request->all());
+        return $availableType;
     }
     
     public function destroy(AvailableType $availableType)

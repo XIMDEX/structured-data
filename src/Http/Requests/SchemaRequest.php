@@ -4,7 +4,7 @@ namespace Ximdex\StructuredData\Requests;
 
 use Ximdex\StructuredData\Models\Schema;
 use Illuminate\Support\Facades\Request;
-use Ximdex\StructuredData\Rules\SchemaInheritationRule;
+use Ximdex\StructuredData\Rules\ParentSchemaRule;
 
 class SchemaRequest extends ApiRequest
 {   
@@ -26,19 +26,19 @@ class SchemaRequest extends ApiRequest
             // store | update
             case 'POST':
             case 'PUT':
-                $this->addRule('name', 'required');
+                $this->addRule('label', 'required');
             case 'PATCH':
-                $this->addRule('name', 'max:50');
-                $this->addRule('name', 'unique:' . (new Schema)->getTable() . ',name,' . $id);
+                $this->addRule('label', 'max:50');
+                $this->addRule('label', 'unique:' . (new Schema)->getTable() . ',label,' . $id);
                 $this->addRule('comment', 'nullable');
-                $this->addRule('inherited_schemas', 'array');
-                $this->addRule('inherited_schemas.*.id', 'Numeric');
-                $this->addRule('inherited_schemas.*.id', 'gte:1');
-                $this->addRule('inherited_schemas.*.priority', 'Numeric');
-                $this->addRule('inherited_schemas.*.priority', 'gte:1');
+                $this->addRule('parent_schemas', 'array');
+                $this->addRule('parent_schemas.*.id', 'Numeric');
+                $this->addRule('parent_schemas.*.id', 'gte:1');
+                $this->addRule('parent_schemas.*.priority', 'Numeric');
+                $this->addRule('parent_schemas.*.priority', 'gte:1');
                 $this->addRule('*', 'bail');
-                $this->addRule('inherited_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
-                $this->addRule('inherited_schemas', new SchemaInheritationRule($id));
+                $this->addRule('parent_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
+                $this->addRule('parent_schemas', new ParentSchemaRule($id));
         }
         return $this->validations;
     }

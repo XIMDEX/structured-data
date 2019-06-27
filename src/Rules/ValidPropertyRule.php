@@ -30,7 +30,7 @@ class ValidPropertyRule implements Rule
             return false;
         }
         $this->property = $data[1];
-        $property = Property::where('name', $this->property)->first();
+        $property = Property::where('label', $this->property)->first();
         if (! $property) {
             return false;
         }
@@ -49,6 +49,6 @@ class ValidPropertyRule implements Rule
      */
     public function message()
     {
-        return "Property {$this->property} is nod valid for given schema @{$this->schema->name}";
+        return "Property {$this->property} is nod valid for given schema @{$this->schema->label}";
     }
 }

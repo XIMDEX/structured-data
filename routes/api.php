@@ -24,44 +24,44 @@ Route::group([
         'middleware' => config('structureddata.api.middleware.auth')
     ], function () {
         
-        // ENTITIES ...
+        // ITEMS ...
         
-        // Bind entity
-        Route::bind(config('structureddata.api.routes.load-entity'), function($id) {
-            return (config('structureddata.modelsNamespace') . '\Entity')::findOrFail($id);
+        // Bind item
+        Route::bind(config('structureddata.api.routes.load-item'), function($id) {
+            return (config('structureddata.modelsNamespace') . '\Item')::findOrFail($id);
         });
             
-        // Entities manipulation
-        Route::apiResource(config('structureddata.api.routes.load-entity'), config('structureddata.controllersNamespace') 
-            . '\EntityController');
+        // Items manipulation
+        Route::apiResource(config('structureddata.api.routes.load-item'), config('structureddata.controllersNamespace') 
+            . '\ItemController');
         
-        // Load the entities for a reference node
-        Route::get(config('structureddata.api.routes.validate-entity') . '/{entity}', [
+        // Load the items for a reference node
+        Route::get(config('structureddata.api.routes.validate-item') . '/{item}', [
             'as' => 'validate',
-            'uses' => config('structureddata.controllersNamespace') . '\EntityController@validation']);
+            'uses' => config('structureddata.controllersNamespace') . '\ItemController@validation']);
         
-        // ENTITY VALUES ...
+        // ITEM VALUES ...
         
-        // Bind entity value
+        // Bind item value
         Route::bind(config('structureddata.api.routes.load-value'), function($id) {
             return (config('structureddata.modelsNamespace') . '\Value')::findOrFail($id);
         });
             
-        // Entity values manipulation
+        // Item values manipulation
         Route::apiResource(config('structureddata.api.routes.load-value'), config('structureddata.controllersNamespace') 
             . '\ValueController');
         
         // NODES ...
         
-        // Load the entities for a reference node
+        // Load the items for a reference node
         Route::get(config('structureddata.api.routes.load-node') . '/{reference}', [
             'as' => 'load-node',
             'uses' => config('structureddata.controllersNamespace') . '\NodeController@load']);
         
-        // Load the nodes for an entity
-        Route::get(config('structureddata.api.routes.load-entity-nodes') . '/{reference}', [
+        // Load the nodes for an item
+        Route::get(config('structureddata.api.routes.load-item-nodes') . '/{reference}', [
             'as' => 'load-node',
-            'uses' => config('structureddata.controllersNamespace') . '\EntityController@loadNodes']);
+            'uses' => config('structureddata.controllersNamespace') . '\ItemController@loadNodes']);
         
         // SCHEMAS ...
         

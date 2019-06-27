@@ -8,7 +8,7 @@ class Version extends Model
 {
     public $hidden = ['updated_at'];
     
-    public $fillable = ['name'];
+    // public $fillable = ['tag', 'url'];
 
     /**
      * Latest version

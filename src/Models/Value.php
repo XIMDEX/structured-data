@@ -6,11 +6,11 @@ use Ximdex\StructuredData\Core\Model;
 
 class Value extends Model
 {
-    public $fillable = ['available_type_id', 'entity_id', 'ref_entity_id', 'value', 'position'];
+    public $fillable = ['available_type_id', 'item_id', 'ref_item_id', 'value', 'position'];
     
     public $hidden = ['created_at', 'updated_at'];
     
-    public static $except = ['available_type_id', 'entity_id'];
+    public static $except = ['available_type_id', 'item_id'];
     
     /*
     public $casts = ['value' => 'type'];
@@ -27,14 +27,14 @@ class Value extends Model
     }
     */
     
-    public function entity()
+    public function item()
     {
-        return $this->belongsTo(Entity::class);
+        return $this->belongsTo(Item::class);
     }
     
-    public function referenceEntity()
+    public function referenceItem()
     {
-        return $this->belongsTo(Entity::class, 'ref_entity_id');
+        return $this->belongsTo(Item::class, 'ref_item_id');
     }
     
     public function availableType()

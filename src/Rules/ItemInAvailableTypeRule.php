@@ -2,10 +2,10 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Ximdex\StructuredData\Models\Entity;
+use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Models\Schema;
 
-class EntityInAvailableTypeRule extends InAvailableTypeRule
+class ItemInAvailableTypeRule extends InAvailableTypeRule
 {   
     /**
      * Check if the given value is supported in the property available type
@@ -21,13 +21,13 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
         $value = $this->value;
         if ($this->availableType->type != Schema::THING_TYPE) {
             
-            // Type only support an entity
+            // Type only support an item
             return $this->supportMultiValidation;
         }
         /*
         if ($this->availableType->schema_id == Schema::THING_TYPE) {
             
-            // If the schema type is Thing every schema is valid for entity value
+            // If the schema type is Thing every schema is valid for item value
             return true;
         }
         */
@@ -35,18 +35,18 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
             
             // If value contains the type, get only the value given
             if (is_array($id)) {
-                $id = $id['value'];
+                $id = $id['values'];
             }
             if (! is_numeric($id)) {
                 return false;
             }
-            $entity = Entity::find($id);
-            if (! $entity) {
+            $item = Item::find($id);
+            if (! $item) {
                 return false;
             }
-            if (! $entity->schema->extends($this->availableType->schema)) {
+            if (! $item->schema->extends($this->availableType->schema)) {
 
-                // The schemas for the given entity are not supported for this available type
+                // The schemas for the given item are not supported for this available type
                 return false;
             }
         }
@@ -62,6 +62,7 @@ class EntityInAvailableTypeRule extends InAvailableTypeRule
         if (! $this->availableType) {
             return parent::message();
         }
-        return "The :attribute value must be or extends a type @{$this->availableType->schemaName} for {$this->availableType->propertySchema->name} property";
+        return "The :attribute value must be or extends a type @{$this->availableType->schema_label} for "
+            . "{$this->availableType->propertySchema->label} property";
     }
 }

@@ -10,7 +10,7 @@ class Schema extends Model
     
     public $hidden = ['created_at', 'updated_at', 'pivot', 'mainProperties', 'version'];
     
-    public $fillable = ['name', 'comment', 'version_id'];
+    public $fillable = ['label', 'comment', 'version_id'];
     
     public $appends = ['version_tag'];
     
@@ -55,14 +55,14 @@ class Schema extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function inheritedSchemas()
+    public function schemas()
     {
-        $result = $this->belongsToMany(static::class, (new HereditableSchema())->getTable(), null, 'parent_schema_id');
+        $result = $this->belongsToMany(static::class, (new ParentSchema)->getTable(), null, 'parent_schema_id');
         if (Version::getLatest()) {
             
             // Get the latest version of inherited schemas with custom user ones
             $result->where(function ($query) {
-                $table = (new HereditableSchema())->getTable();
+                $table = (new ParentSchema)->getTable();
                 $query->whereRaw($table . '.version_id IS NULL OR ' . $table . '.version_id = ?', Version::getLatest());
             });
         }
@@ -71,7 +71,7 @@ class Schema extends Model
     
     /**
      * Retrieve the properties for the current schema and its parents
-     * Use low level unique property name
+     * Use low level unique property label
      * 
      * @param array $schemas
      * @return \Illuminate\Database\Eloquent\Collection
@@ -80,7 +80,7 @@ class Schema extends Model
     {
         // Load specific properties for this schema
         $properties = $this->mainProperties;
-        foreach ($this->inheritedSchemas as $schema) {
+        foreach ($this->schemas as $schema) {
             if (in_array($schema->id, $schemas)) {
                 
                 // This schema was processed already
@@ -91,7 +91,7 @@ class Schema extends Model
             // Merge the parent schema properties ordered by order field
             $properties = $properties->merge($schema->properties($schemas)->sortBy('order'));
         }
-        return $properties->unique('name');
+        return $properties->unique('label');
     }
     
     /**
@@ -105,7 +105,7 @@ class Schema extends Model
         if ($this->id == $schema->id) {
             return true;
         }
-        foreach ($this->inheritedSchemas as $inheritedSchema) {
+        foreach ($this->schemas as $inheritedSchema) {
             if ($inheritedSchema->id == $schema->id) {
                 return true;
             }

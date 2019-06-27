@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Request;
 class ApiRequest extends FormRequest
 {
     protected $validations = [
-        'name' => [
+        'label' => [
             'string',
             'min:3',
             'max:255',
@@ -40,7 +40,7 @@ class ApiRequest extends FormRequest
             case 'POST':
             case 'PUT':
             case 'PATH':
-                // $this->addRule('name', 'required');
+                // $this->addRule('label', 'required');
                 break;
         }
         return $this->validations;

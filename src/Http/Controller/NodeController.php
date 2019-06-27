@@ -9,6 +9,6 @@ class NodeController extends Controller
     public function load(string $reference)
     {
         $node = Node::where('reference', $reference)->firstOrFail();
-        return response()->json($node->entities);
+        return response()->json($node->items);
     }
 }

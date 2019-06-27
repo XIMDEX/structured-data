@@ -4,13 +4,13 @@ namespace Ximdex\StructuredData\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
-use Ximdex\StructuredData\Models\Entity;
+use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Models\Value;
-use Ximdex\StructuredData\Requests\EntityRequest;
+use Ximdex\StructuredData\Requests\ItemRequest;
 use GuzzleHttp\Client;
 use Symfony\Component\HttpFoundation\Response;
 
-class EntityController extends Controller
+class ItemController extends Controller
 {
     const RDF_FORMAT = 'rdf';
     
@@ -18,17 +18,17 @@ class EntityController extends Controller
     
     public function index()
     {
-        return response()->json(Entity::all());
+        return response()->json(Item::all());
     }
     
-    public function show(Entity $entity)
+    public function show(Item $item)
     {
         if (Request::get('show')) {
             $show = explode(',', Request::get('show'));
         } else {
             $show = [];
         }
-        $result = $entity->toJsonLD($show);
+        $result = $item->toJsonLD($show);
         if (Request::get('format') == self::RDF_FORMAT) {
             $graph = new \EasyRdf_Graph();
             $graph->parse(json_encode($result), 'jsonld');
@@ -39,65 +39,65 @@ class EntityController extends Controller
         return response()->json($result);
     }
     
-    public function store(EntityRequest $request)
+    public function store(ItemRequest $request)
     {
         // Start a transaction
         DB::beginTransaction();
         
-        // Create the new entity
-        $entity = Entity::create($request->all());
+        // Create the new item
+        $item = Item::create($request->all());
         
         // Add the properties values
-        $entity->loadValuesFromProperties($request->properties);
-        $entity->push();
+        $item->loadValuesFromProperties($request->properties);
+        $item->push();
         
-        // Save entity data
+        // Save item data
         DB::commit();
-        $entity->values;
-        return $entity;
+        $item->values;
+        return $item;
     }
     
-    public function update(EntityRequest $request, Entity $entity)
+    public function update(ItemRequest $request, Item $item)
     {
         // Start a transaction
         DB::beginTransaction();
         
-        // Update the entity values
-        $entity->update($request->all());
+        // Update the item values
+        $item->update($request->all());
         
         // Values deletion by given ids in request parameter
         if (is_array($request->delete)) {
             Value::destroy($request->delete);
         }
         
-        // Update the entity properties values
-        $entity->loadValuesFromProperties($request->properties);
-        $entity->push();
+        // Update the item properties values
+        $item->loadValuesFromProperties($request->properties);
+        $item->push();
         
-        // Save entity data
+        // Save item data
         DB::commit();
-        $entity->values;
-        return $entity;
+        $item->values;
+        return $item;
     }
     
-    public function destroy(Entity $entity)
+    public function destroy(Item $item)
     {
-        $entity->delete();
+        $item->delete();
     }
     
     public function loadNodes(int $id)
     {
-        $entity = Entity::findOrFail($id);
-        return response()->json($entity->nodes);
+        $item = Item::findOrFail($id);
+        return response()->json($item->nodes);
     }
     
-    public function validation(Entity $entity)
+    public function validation(Item $item)
     {
         $client = new Client();
         try {
             $response = $client->request('POST', self::GOOGLE_TESTING_TOOL_URL, [
                 'form_params' => [
-                    'html' => json_encode($entity->toJsonLD())
+                    'html' => json_encode($item->toJsonLD())
                 ]
             ]);
         } catch (\Exception $e) {

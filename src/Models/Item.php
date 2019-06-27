@@ -4,7 +4,7 @@ namespace Ximdex\StructuredData\Models;
 
 use Ximdex\StructuredData\Core\Model;
 
-class Entity extends Model
+class Item extends Model
 {
     public $fillable = ['schema_id'];
     
@@ -12,17 +12,17 @@ class Entity extends Model
     
     public static $except = ['schema_id'];
     
-    protected $appends = ['schema_url', 'schema_name'];
+    protected $appends = ['schema_url', 'schema_label'];
     
     public function getSchemaUrlAttribute(): string
     {
-        return route('linked-data.' . config('structureddata.api.routes.load-entity') . '.show', ['entity' => $this->id]);
+        return route('linked-data.' . config('structureddata.api.routes.load-item') . '.show', ['item' => $this->id]);
     }
     
-    public function getSchemaNameAttribute() : ?string
+    public function getSchemaLabelAttribute() : ?string
     {
         if ($this->schema_id) {
-            return $this->schema->name;
+            return $this->schema->label;
         }
         return null;
     }
@@ -34,7 +34,7 @@ class Entity extends Model
    
     public function nodes()
     {
-        return $this->belongsToMany(Node::class, (new EntityNode)->getTable());
+        return $this->belongsToMany(Node::class, (new ItemNode)->getTable());
     }
     
     public function values(bool $deprecated = false)
@@ -53,7 +53,7 @@ class Entity extends Model
     }
     
     /**
-     * Load the values for the given properties to add or update in this entity
+     * Load the values for the given properties to add or update in this item
      * 
      * @param array $properties
      * @param bool $delete
@@ -62,7 +62,12 @@ class Entity extends Model
     {
         foreach ($properties as $property) {
             $position = 1;
-            $deleted = [];
+            $type = AvailableType::findOrFail($property['type']);
+            if ($delete or (isset($property['delete']) and $property['delete'])) {
+                
+                // Delete all the current values for this property
+                $this->values()->where('available_type_id', $type->id)->delete();
+            }
             foreach ($property['values'] as $value) {
                 
                 // Value can be an array contain the id, value and other optional information
@@ -72,29 +77,22 @@ class Entity extends Model
                 } else {
                     $id = null;
                 }
-                $type = AvailableType::findOrFail($property['type']);
-                if ($delete or (isset($property['deleteAll']) and $property['deleteAll']) and ! in_array($type->id, $deleted)) {
-                    
-                    // Delete all the current values for this property
-                    $this->values()->where('available_type_id', $type->id)->delete();
-                    $deleted[] = $type->id;
-                }
                 if ($type->type == Schema::THING_TYPE) {
                     
-                    // Value is an entity ID
-                    $entityId = $value;
+                    // Value is an item ID
+                    $itemId = $value;
                     $value = null;
                 } else {
-                    $entityId = null;
+                    $itemId = null;
                 }
                 $updated = false;
                 if ($id) {
-                    if ($entityValue = $this->values->find($id)) {
+                    if ($itemValue = $this->values->find($id)) {
                         
-                        // Update an existing property value in this entity
-                        $entityValue->value = $value;
-                        $entityValue->ref_entity_id = $entityId;
-                        $entityValue->position = $position++;
+                        // Update an existing property value in this item
+                        $itemValue->value = $value;
+                        $itemValue->ref_item_id = $itemId;
+                        $itemValue->position = $position++;
                         $updated = true;
                     }
                 }
@@ -102,10 +100,10 @@ class Entity extends Model
                     
                     // Create a new property value with given data
                     $this->values->add(new Value([
-                        'entity_id' => $this->id, 
+                        'item_id' => $this->id, 
                         'available_type_id' => $type->id,
                         'value' => $value,
-                        'ref_entity_id' => $entityId,
+                        'ref_item_id' => $itemId,
                         'position' => $position++
                     ]));
                 }
@@ -116,7 +114,7 @@ class Entity extends Model
     public function reference(array $show = [])
     {
         $reference = [
-            '@type' => $this->schema->name,
+            '@type' => $this->schema->label,
             '@id' => $this->schema_url
         ];
         if ($show) {
@@ -138,17 +136,17 @@ class Entity extends Model
         $object = [
             '@context' => 'http://schema.org'
         ];
-        $object = array_merge($object, $this->entityToSchema($show));
+        $object = array_merge($object, $this->itemToSchema($show));
         return $object;
     }
     
-    protected function entityToSchema(array $show, int $depth = null, array & $entities = []): array
+    protected function itemToSchema(array $show, int $depth = null, array & $items = []): array
     {
         $properties = [];
-        if (in_array($this->id, $entities) === false) {
+        if (in_array($this->id, $items) === false) {
             
-            // This entity will never be shown in later levels
-            $entities[] = $this->id;
+            // This item will never be shown in later levels
+            $items[] = $this->id;
         }
         
         // Schema type
@@ -159,41 +157,41 @@ class Entity extends Model
         
         // Properties values
         foreach ($this->values(in_array('deprecated', $show))->orderBy('position')->get() as $value) {
-            $property = $value->availableType->propertySchema->property->name;
+            $property = $value->availableType->propertySchema->property->label;
             $order = $value->availableType->propertySchema->order;
             if ($value->availableType->type == Schema::THING_TYPE) {
-                if (! $value->ref_entity_id) {
+                if (! $value->ref_item_id) {
                     
-                    // No entity defined for this value !
+                    // No item defined for this value !
                     continue;
                 }
                 /*
-                if (! $value->referenceEntity->schema->extends($value->availableType->schema)) {
+                if (! $value->referenceItem->schema->extends($value->availableType->schema)) {
                     
-                    // Schema for entity is different to property type !
+                    // Schema for item is different to property type !
                     continue;
                 }
                 */
-                if (in_array($value->ref_entity_id, $entities) !== false || $depth === 0) {
+                if (in_array($value->ref_item_id, $items) !== false || $depth === 0) {
                     
-                    // We dont continue if the entity has been showed before
-                    $referenceEntity = $value->referenceEntity->reference();
+                    // We dont continue if the item has been showed before
+                    $referenceItem = $value->referenceItem->reference();
                 } else {
-                    $referenceEntity = $value->referenceEntity->entityToSchema([], $depth - 1, $entities);
+                    $referenceItem = $value->referenceItem->itemToSchema([], $depth - 1, $items);
                 }
-                if (! $referenceEntity) {
+                if (! $referenceItem) {
                     
                     // There is not values for this property
                     continue;
                 }
-                $entityValue = $referenceEntity;
+                $itemValue = $referenceItem;
             } else {
                 
                 // This property as simple type value
-                $entityValue = $value->value;
+                $itemValue = $value->value;
             }
             if ($show) {
-                $entityValue = $this->addExtraInfoToValue($value, $show, is_array($entityValue) ? $entityValue : null);
+                $itemValue = $this->addExtraInfoToValue($value, $show, is_array($itemValue) ? $itemValue : null);
             }
             if (array_key_exists($property, $object)) {
                 
@@ -202,11 +200,11 @@ class Entity extends Model
                     $object[$property] = [$object[$property]];
                     $properties[] = $property;
                 }
-                $object[$property][] = $entityValue;
+                $object[$property][] = $itemValue;
             } else {
                 
                 // Property with a single value
-                $object[$property] = $entityValue;
+                $object[$property] = $itemValue;
             }
             $propertiesOrder[$property] = $order;
         }
@@ -244,7 +242,7 @@ class Entity extends Model
         if (! $data) {
             return $value->value;
         }
-        if (! $value->ref_entity_id) {
+        if (! $value->ref_item_id) {
             $data['@value'] = $value->value;
         }
         return $data;

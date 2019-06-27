@@ -32,16 +32,16 @@ class AvailableType extends Model
     
     public $hidden = ['created_at', 'updated_at', 'property_schema_id', 'schema', 'version'];
     
-    public $appends = ['schema_name', 'version_tag'];
+    public $appends = ['schema_label', 'version_tag'];
     
     public $fillable = ['schema_id', 'property_schema_id', 'type', 'version_id'];
     
     public static $except = ['property_schema_id'];
     
-    public function getSchemaNameAttribute() : ?string
+    public function getSchemaLabelAttribute() : ?string
     {
         if ($this->schema_id) {
-            return $this->schema->name;
+            return $this->schema->label;
         }
         return null;
     }
@@ -78,6 +78,6 @@ class AvailableType extends Model
         if ($this->type != Schema::THING_TYPE) {
             $this->schema_id = null;
         }
-        parent::update($attributes, $options); 
+        return parent::update($attributes, $options); 
     }
 }

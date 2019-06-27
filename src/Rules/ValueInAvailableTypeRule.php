@@ -26,7 +26,7 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
         $value = $this->value;
         if ($this->availableType->type == Schema::THING_TYPE) {
             
-            // Type only support an entity
+            // Type only support an item
             return $this->supportMultiValidation;
         }
         foreach ($value as & $val) {
@@ -90,6 +90,6 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
         if (! $this->availableType) {
             return parent::message();
         }
-        return "The :attribute must be a valid type ({$this->availableType->type}) for {$this->availableType->propertySchema->name} property";
+        return "The :attribute must be a valid type ({$this->availableType->type}) for {$this->availableType->propertySchema->label} property";
     }
 }

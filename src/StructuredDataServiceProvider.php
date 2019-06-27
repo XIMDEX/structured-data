@@ -22,7 +22,7 @@ class StructuredDataServiceProvider extends ServiceProvider
         }
         
         $this->commands([
-            \Ximdex\StructuredData\Commands\SchemaImporter::class
+            \Ximdex\StructuredData\Commands\SchemasImporter::class
         ]);
         
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');

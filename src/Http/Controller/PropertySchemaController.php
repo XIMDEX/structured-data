@@ -29,12 +29,13 @@ class PropertySchemaController extends Controller
     
     public function update(PropertySchemaRequest $request, PropertySchema $propSchema)
     {
-        if ($request->input('name') and $propSchema->name != $request->input('name')) {
+        if ($request->input('label') and $propSchema->label != $request->input('label')) {
             
-            // New property name was given
+            // New property label was given
             $propSchema->property_id = null;
         }
-        return $propSchema->update($request->all());
+        $propSchema->update($request->all());
+        return $propSchema;
     }
     
     public function destroy(PropertySchema $propSchema)
