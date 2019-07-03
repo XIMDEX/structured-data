@@ -42,6 +42,8 @@ class ValueRequest extends ApiRequest
                 $this->addRule('*', 'bail');
                 $this->addRule('value', new ValueInAvailableTypeRule($this->get('available_type_id')));
                 $this->addRule('ref_item_id', new ItemInAvailableTypeRule($this->get('available_type_id')));
+            default:
+                break;
         }
         return $this->validations;
     }

@@ -21,3 +21,6 @@ Homestead.json
 /.settings/
 /.buildpath
 /.project
+/.ci/
+/.scannerwork/
+/sonar-project.properties

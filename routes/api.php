@@ -75,10 +75,9 @@ Route::group([
         
         // Schemas importer command
         Route::get(config('structureddata.api.routes.schemas-import'), function() {
-            $res = Artisan::call('schemas:import', [
+            return Artisan::call('schemas:import', [
                 'url' => Request::get('url')
             ]);
-            return $res;
         });
         
         // PROPERTIES ...

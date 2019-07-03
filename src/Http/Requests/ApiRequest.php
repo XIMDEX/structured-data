@@ -3,7 +3,6 @@
 namespace Ximdex\StructuredData\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Request;
 
 class ApiRequest extends FormRequest
 {
@@ -33,16 +32,6 @@ class ApiRequest extends FormRequest
      */
     public function rules(): array
     {
-        $method = Request::method();
-        switch ($method) {
-            
-            // store | update
-            case 'POST':
-            case 'PUT':
-            case 'PATH':
-                // $this->addRule('label', 'required');
-                break;
-        }
         return $this->validations;
     }
     

@@ -51,6 +51,8 @@ class PropertySchemaRequest extends ApiRequest
                     $this->get('property_id'),
                     $this->get('label')
                 ));
+            default:
+                break;
         }
         return $this->validations;
     }

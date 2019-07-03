@@ -29,6 +29,7 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
             // Type only support an item
             return $this->supportMultiValidation;
         }
+        $result = true;
         foreach ($value as & $val) {
             
             // If value contains the type, get only the value given
@@ -40,45 +41,38 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
                 // Check if value is a valid boolean type
                 case AvailableType::BOOLEAN_TYPE:
                     if (! in_array($val, ['true', 'false', '1', '0'])) {
-                        return false;
+                        $result = false;
                     }
                     break;
     
                 // Check if value is a valid number type
                 case AvailableType::NUMBER_TYPE:
                     if (! is_numeric($val)) {
-                        return false;
+                        $result = false;
                     }
                     break;
-                    
+                
                 // Check if value is a valid date type
                 case AvailableType::DATE_TYPE:
-                    $format = self::DATE_FORMAT;
+                    $result = $this->checkDateTimesFormat(self::DATE_FORMAT, $val);
+                    break;
                 
                 // Check if value is a valid time type
                 case AvailableType::TIME_TYPE:
-                    $format = self::TIME_FORMAT;
+                    $result = $this->checkDateTimesFormat(self::TIME_FORMAT, $val);
+                    break;
                 
                 // Check if value is a valid date time type
                 case AvailableType::DATETIME_TYPE:
-                    $format = self::DATE_FORMAT . ' ' . self::TIME_FORMAT;
-                    
-                // Check the format for date | time
-                case AvailableType::DATE_TYPE:
-                case AvailableType::TIME_TYPE:
-                case AvailableType::DATETIME_TYPE:
-                    try {
-                        $val = Carbon::createFromFormat($format, $val);
-                        if ($val === false) {
-                            return false;
-                        }
-                    } catch (\Exception $e) {
-                        return false;
-                    }
+                    $result = $this->checkDateTimesFormat(self::DATE_FORMAT . ' ' . self::TIME_FORMAT, $val);
+                    break;
+                
+                // Another types
+                default:
                     break;
             }
         }
-        return true;
+        return $result;
     }
     
     /**
@@ -91,5 +85,18 @@ class ValueInAvailableTypeRule extends InAvailableTypeRule
             return parent::message();
         }
         return "The :attribute must be a valid type ({$this->availableType->type}) for {$this->availableType->propertySchema->label} property";
+    }
+    
+    private function checkDateTimesFormat(string $format, string $val): bool
+    {
+        try {
+            $val = Carbon::createFromFormat($format, $val);
+            if ($val === false) {
+                return false;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+        return true;
     }
 }

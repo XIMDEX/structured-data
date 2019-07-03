@@ -12,6 +12,10 @@ use Ximdex\StructuredData\Rules\ItemInAvailableTypeRule;
 use Ximdex\StructuredData\Rules\NeededPropertiesRule;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Rules\TypeAllowedInPropertyRule;
+/*
+use Ximdex\StructuredData\Rules\MinCardinalityRule;
+use Ximdex\StructuredData\Rules\MaxCardinalityRule;
+*/
 
 class ItemRequest extends ApiRequest
 {   
@@ -79,6 +83,8 @@ class ItemRequest extends ApiRequest
                 $this->addRule('properties.*', new MinCardinalityRule());
                 $this->addRule('properties.*', new MaxCardinalityRule());
                 */
+            default:
+                break;
         }
         return $this->validations;
     }

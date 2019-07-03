@@ -39,6 +39,8 @@ class SchemaRequest extends ApiRequest
                 $this->addRule('*', 'bail');
                 $this->addRule('parent_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
                 $this->addRule('parent_schemas', new ParentSchemaRule($id));
+            default:
+                break;
         }
         return $this->validations;
     }

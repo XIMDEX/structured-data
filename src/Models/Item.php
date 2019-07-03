@@ -87,15 +87,13 @@ class Item extends Model
                     $itemId = null;
                 }
                 $updated = false;
-                if ($id) {
-                    if ($itemValue = $this->values->find($id)) {
+                if ($id and $itemValue = $this->values->find($id)) {
                         
-                        // Update an existing property value in this item
-                        $itemValue->value = $value;
-                        $itemValue->ref_item_id = $itemId;
-                        $itemValue->position = $position++;
-                        $updated = true;
-                    }
+                    // Update an existing property value in this item
+                    $itemValue->value = $value;
+                    $itemValue->ref_item_id = $itemId;
+                    $itemValue->position = $position++;
+                    $updated = true;
                 }
                 if (! $updated) {
                     
@@ -138,8 +136,7 @@ class Item extends Model
         $object = [
             '@context' => 'http://schema.org'
         ];
-        $object = array_merge($object, $this->itemToSchema($show));
-        return $object;
+        return array_merge($object, $this->itemToSchema($show));
     }
     
     public function toRDF(): string
@@ -160,8 +157,7 @@ class Item extends Model
         $query = $this->itemToNeo4j($result);
         
         // Retrieve main item generated
-        $query .= 'RETURN ' . Str::camel($result['@type']) . $result['@item'];
-        return $query;
+        return $query . 'RETURN ' . Str::camel($result['@type']) . $result['@item'];
     }
     
     protected function itemToSchema(array $show, int $depth = null, array & $items = []): array

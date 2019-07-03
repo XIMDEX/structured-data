@@ -37,6 +37,8 @@ class AvailableTypeRequest extends ApiRequest
                 $this->addRule('schema_id', 'exists:' . (new Schema)->getTable() . ',id');
                 $this->addRule('type', Rule::in(AvailableType::SIMPLE_TYPES));
                 $this->addRule('type', new AvailableTypeThingRule($this->get('schema_id')));
+            default:
+                break;
         }
         return $this->validations;
     }
