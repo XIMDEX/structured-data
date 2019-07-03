@@ -2,6 +2,7 @@
 
 namespace Ximdex\StructuredData\Models;
 
+use Illuminate\Support\Str;
 use Ximdex\StructuredData\Core\Model;
 
 class Item extends Model
@@ -111,7 +112,7 @@ class Item extends Model
         }
     }
     
-    public function reference(array $show = [])
+    public function reference(array $show = []): array
     {
         $reference = [
             '@type' => $this->schema->label,
@@ -120,6 +121,7 @@ class Item extends Model
         if ($show) {
             if (in_array('uid', $show)) {
                 $reference['@uid'] = $this->schema->id;
+                $reference['@item'] = $this->id;
             }
             if (in_array('version', $show)) {
                 $reference['@version'] = $this->schema->version->id;
@@ -131,13 +133,35 @@ class Item extends Model
         return $reference;
     }
     
-    public function toJsonLD(array $show = []) : array
+    public function toJsonLD(array $show = []): array
     {
         $object = [
             '@context' => 'http://schema.org'
         ];
         $object = array_merge($object, $this->itemToSchema($show));
         return $object;
+    }
+    
+    public function toRDF(): string
+    {
+        $result = $this->toJsonLD();
+        $graph = new \EasyRdf_Graph();
+        $graph->parse(json_encode($result), 'jsonld');
+        $format = \EasyRdf_Format::getFormat('rdfxml');
+        return $graph->serialise($format);
+    }
+    
+    public function toNeo4j(): string
+    {
+        // Get JSON+LD  
+        $result = $this->toJsonLD(['uid']);
+        
+        // Obtain the script code for each item in the result
+        $query = $this->itemToNeo4j($result);
+        
+        // Retrieve main item generated
+        $query .= 'RETURN ' . Str::camel($result['@type']) . $result['@item'];
+        return $query;
     }
     
     protected function itemToSchema(array $show, int $depth = null, array & $items = []): array
@@ -177,7 +201,7 @@ class Item extends Model
                     // We dont continue if the item has been showed before
                     $referenceItem = $value->referenceItem->reference();
                 } else {
-                    $referenceItem = $value->referenceItem->itemToSchema([], $depth - 1, $items);
+                    $referenceItem = $value->referenceItem->itemToSchema($show, $depth - 1, $items);
                 }
                 if (! $referenceItem) {
                     
@@ -229,6 +253,9 @@ class Item extends Model
         }
         if (in_array('uid', $show)) {
             $data['@uid'] = $value->id;
+            if ($value->ref_item_id) {
+                $data['@item'] = $value->ref_item_id;
+            }
         }
         if (in_array('type', $show)) {
             $data['@type'] = $value->available_type_id;
@@ -246,5 +273,47 @@ class Item extends Model
             $data['@value'] = $value->value;
         }
         return $data;
+    }
+    
+    private function itemToNeo4j(array $item, array & $items = []): string
+    {
+        // Create or update main item
+        $itemName = Str::camel($item['@type']) . $item['@item'];
+        
+        // Only declare an item one time
+        if (! in_array($item['@item'], $items)) {
+            $query = "MERGE ({$itemName}:{$item['@type']} {id:{$item['@item']}})" . PHP_EOL;
+            $items[] = $item['@item'];
+        } else {
+            $query = '';
+        }
+        
+        // Item properties
+        foreach ($item as $property => $values) {
+            if (Str::startsWith($property, '@')) {
+                continue;
+            }
+            if (array_key_exists('@value', $values) or array_key_exists('@item', $values)) {
+                $values = [$values];
+            }
+            $simpleValues = [];
+            foreach ($values as $value) {
+                if (array_key_exists('@item', $value)) {
+                    
+                    // This is a item, so a relation for this property is needed
+                    $query .= $this->itemToNeo4j($value, $items);
+                    $relatedItemName = Str::camel($value['@type']) . $value['@item'];
+                    $query .= "MERGE ({$itemName})-[:" . strtoupper($property) . "]->({$relatedItemName})" . PHP_EOL;
+                } elseif (array_key_exists('@value', $value)) {
+                    $simpleValues[] = $value['@value'];
+                }
+            }
+            if ($simpleValues) {
+                
+                // This property contains an array of values
+                $query .= "SET {$itemName}.{$property} = ['" . implode("', '", $simpleValues) . "']" . PHP_EOL;
+            }
+        }
+        return $query;
     }
 }

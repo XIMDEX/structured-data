@@ -14,6 +14,8 @@ class ItemController extends Controller
 {
     const RDF_FORMAT = 'rdf';
     
+    const NEO4J_FORMAT = 'neo4j';
+    
     const GOOGLE_TESTING_TOOL_URL = 'https://search.google.com/structured-data/testing-tool/validate';
     
     public function index()
@@ -28,14 +30,19 @@ class ItemController extends Controller
         } else {
             $show = [];
         }
-        $result = $item->toJsonLD($show);
         if (Request::get('format') == self::RDF_FORMAT) {
-            $graph = new \EasyRdf_Graph();
-            $graph->parse(json_encode($result), 'jsonld');
-            $format = \EasyRdf_Format::getFormat('rdfxml');
-            $result = $graph->serialise($format);
+            $result = $item->toRDF($show);
             return response($result, 200, ['Content-Type' => 'application/xml']);
         }
+        if (Request::get('format') == self::NEO4J_FORMAT) {
+            $result = $item->toNeo4j();
+            if (Request::has('download')) {
+                return response()->streamDownload(function () use ($result) { echo $result; }, 'neo4j.cypher');
+            } else {
+                return response($result);
+            }
+        }
+        $result = $item->toJsonLD($show);
         return response()->json($result);
     }
     
