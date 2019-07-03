@@ -17,7 +17,7 @@ class Item extends Model
     
     public function getSchemaUrlAttribute(): string
     {
-        return route('linked-data.' . config('structureddata.api.routes.load-item') . '.show', ['item' => $this->id]);
+        return route('structured-data.' . config('structureddata.api.routes.load-item') . '.show', ['item' => $this->id]);
     }
     
     public function getSchemaLabelAttribute() : ?string

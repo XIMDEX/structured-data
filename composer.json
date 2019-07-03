@@ -1,5 +1,5 @@
 {
-    "name": "ximdex/linked-data",
+    "name": "ximdex/structured-data",
     "description": "Linked data repository",
     "license": "AGPL-3.0",
     "authors": [
@@ -8,7 +8,7 @@
             "email": "ajlucena@gximdex.com"
         }
     ],
-    "homepage": "https://github.com/XIMDEX/linked-data",
+    "homepage": "https://github.com/XIMDEX/structured-data",
     "keywords": ["Laravel", "ximdex", "Linked data", "json-ld"],
     "require": {
         "illuminate/support": "~5",

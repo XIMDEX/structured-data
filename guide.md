@@ -20,7 +20,6 @@ We assume in this manual that the host for our Laravel instance is under a host 
 This petition will retrieve a JSON code with all the schemas that are actually created in our storage. 
 ## API endpoints specificaction
 Operations over schemas an items data give you a complete control to create or update schemas, generate items of a type of this schemas and associate information to its properties.
-Any endpoint will 
 ### Schemas importation
 For a brand new installation, there are not any schema to work with. To import a schema definitions URL provided by schema.org you can run this console command under the laravel directory:
 `php artisan schemas:import http://schema.org/version/latest/schema.jsonld`
@@ -87,7 +86,10 @@ The result of this request will be a JSON code with the definition of a schema i
 }
 ```
 We can see all the properties and the available types to each one for the type *Person* and the inherited schemas given in the "schemas" node. In this example the properties from the *Thing* schema.
-> It's possible to retrieve the deprecated definitions like old version properties or types for this schema, using the parameter **show** with the *deprecated* value.
-> 
-> [GET] http://localhost/api/v1/schema/45?show=deprecated
+#### The show parameter
+This argument can be used to show extra information in the schema definition. Usage:
+>[GET] http://localhost/api/v1/schema/45?show=deprecated
+
+This is a list of 
+* Deprecated: It's possible to retrieve the deprecated definitions like old version properties or types for this schema, using the *deprecated* value.
 

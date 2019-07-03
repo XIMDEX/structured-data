@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     'prefix' => 'api/v1',
-    'as' => 'linked-data.',
+    'as' => 'structured-data.',
     'middleware' => config('structureddata.api.middleware.base')
 ], function () {
     Route::group([
