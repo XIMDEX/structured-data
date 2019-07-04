@@ -21,10 +21,27 @@ class SchemaController extends Controller
     
     public function store(SchemaRequest $request)
     {
-        return Schema::create($request->all());
+        $schema = Schema::create($request->all());
+        if ($this->assingSchemas($schema, $request)) {
+            
+        }
+        return $schema;
     }
     
     public function update(SchemaRequest $request, Schema $schema)
+    {
+        $schema->update($request->all());
+        $this->assingSchemas($schema, $request);
+        $schema->schemas;
+        return $schema;
+    }
+    
+    public function destroy(Schema $schema)
+    {
+        $schema->delete();
+    }
+    
+    private function assingSchemas(Schema $schema, SchemaRequest $request): void
     {
         $schemas = $request->get('schemas', false);
         if ($schemas !== false) {
@@ -36,14 +53,7 @@ class SchemaController extends Controller
                     $syncSchemas[] = $data['id'];
                 }
             }
-            $schema->schemas()->sync($syncSchemas);
+            $schema->schemas->sync($syncSchemas);
         }
-        $schema->update($request->all());
-        return $schema;
-    }
-    
-    public function destroy(Schema $schema)
-    {
-        $schema->delete();
     }
 }
