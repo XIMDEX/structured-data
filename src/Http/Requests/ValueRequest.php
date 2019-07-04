@@ -2,7 +2,6 @@
 
 namespace Ximdex\StructuredData\Requests;
 
-use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Rules\ValueInAvailableTypeRule;
@@ -17,8 +16,7 @@ class ValueRequest extends ApiRequest
     public function rules(): array
     {
         parent::rules();
-        $method = Request::method();
-        switch ($method) {
+        switch ($this->method) {
             
             // store | update
             case 'POST':

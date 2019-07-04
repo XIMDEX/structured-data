@@ -3,6 +3,7 @@
 namespace Ximdex\StructuredData\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Request;
 
 class ApiRequest extends FormRequest
 {
@@ -14,6 +15,8 @@ class ApiRequest extends FormRequest
             'alpha'
         ]
     ];
+    
+    protected $method;
     
     /**
      * Determine if the user is authorized to make this request
@@ -32,6 +35,7 @@ class ApiRequest extends FormRequest
      */
     public function rules(): array
     {
+        $this->method = Request::method();
         return $this->validations;
     }
     

@@ -2,7 +2,6 @@
 
 namespace Ximdex\StructuredData\Requests;
 
-use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Schema;
 use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Rules\SchemaPropertyDuplicationRule;
@@ -16,8 +15,7 @@ class PropertySchemaRequest extends ApiRequest
     public function rules(): array
     {
         parent::rules();
-        $method = Request::method();
-        switch ($method) {
+        switch ($this->method) {
             
             // store | update
             case 'POST':

@@ -3,7 +3,6 @@
 namespace Ximdex\StructuredData\Requests;
 
 use Ximdex\StructuredData\Models\Schema;
-use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Rules\ParentSchemaRule;
 
 class SchemaRequest extends ApiRequest
@@ -14,22 +13,18 @@ class SchemaRequest extends ApiRequest
      */
     public function rules(): array
     {
+        parent::rules();
         if ($this->schema) {
             $id = $this->schema->id;
         } else {
             $id = null;
         }
-        parent::rules();
-        $method = Request::method();
-        switch ($method) {
-            
-            // store | update
+        switch ($this->method) {
             case 'POST':
             case 'PUT':
                 $this->addRule('label', 'required');
             case 'PATCH':
                 $this->addRule('label', 'max:50');
-                $this->addRule('label', 'unique:' . (new Schema)->getTable() . ',label,' . $id);
                 $this->addRule('comment', 'nullable');
                 $this->addRule('parent_schemas', 'array');
                 $this->addRule('parent_schemas.*.id', 'Numeric');
@@ -37,8 +32,8 @@ class SchemaRequest extends ApiRequest
                 $this->addRule('parent_schemas.*.priority', 'Numeric');
                 $this->addRule('parent_schemas.*.priority', 'gte:1');
                 $this->addRule('*', 'bail');
+                $this->addRule('label', 'unique:' . (new Schema)->getTable() . ',label,' . $id);
                 $this->addRule('parent_schemas.*.id', 'exists:' . (New Schema)->getTable() . ',id');
-                $this->addRule('parent_schemas', new ParentSchemaRule($id));
             default:
                 break;
         }

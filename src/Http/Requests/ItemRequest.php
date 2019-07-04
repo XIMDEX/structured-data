@@ -2,7 +2,6 @@
 
 namespace Ximdex\StructuredData\Requests;
 
-use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
 use Ximdex\StructuredData\Models\Schema;
 use Ximdex\StructuredData\Models\Value;
@@ -12,10 +11,6 @@ use Ximdex\StructuredData\Rules\ItemInAvailableTypeRule;
 use Ximdex\StructuredData\Rules\NeededPropertiesRule;
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Rules\TypeAllowedInPropertyRule;
-/*
-use Ximdex\StructuredData\Rules\MinCardinalityRule;
-use Ximdex\StructuredData\Rules\MaxCardinalityRule;
-*/
 
 class ItemRequest extends ApiRequest
 {   
@@ -26,13 +21,12 @@ class ItemRequest extends ApiRequest
     public function rules(): array
     {
         parent::rules();
-        $method = Request::method();
         if ($this->item and $this->item->schema_id) {
             $schemaId = $this->item->schema_id;
         } else {
             $schemaId = $this->get('schema_id');
         }
-        switch ($method) {
+        switch ($this->method) {
                 
             // store | update
             case 'POST':
