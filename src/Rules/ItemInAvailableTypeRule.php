@@ -24,13 +24,6 @@ class ItemInAvailableTypeRule extends InAvailableTypeRule
             // Type only support an item
             return $this->supportMultiValidation;
         }
-        /*
-        if ($this->availableType->schema_id == Schema::THING_TYPE) {
-            
-            // If the schema type is Thing every schema is valid for item value
-            return true;
-        }
-        */
         foreach ($value as $id) {
             
             // If value contains the type, get only the value given

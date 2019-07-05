@@ -137,8 +137,7 @@ class SchemasImporter extends Command
         
         // Load JSON code
         $this->info('Getting schemas information from URL content');
-        $data = json_decode($content, true);
-        return $data;
+        return json_decode($content, true);
     }
     
     /**

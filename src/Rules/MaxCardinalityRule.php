@@ -17,12 +17,8 @@ class MaxCardinalityRule extends InAvailableTypeRule
         }
         $value = $this->value;
         $maxCardinality = $this->availableType->propertySchema->max_cardinality;
-        if ($maxCardinality > 0) {
-            
-            // Given values count
-            if (count($this->value) > $maxCardinality) {
-                return false;
-            }
+        if ($maxCardinality > 0 && count($this->value) > $maxCardinality) {
+            return false;
         }
         return true;
     }

@@ -30,11 +30,11 @@ class ValidPropertyRule implements Rule
             return false;
         }
         $this->property = $data[1];
-        $property = Property::where('label', $this->property)->first();
-        if (! $property) {
+        $prop = Property::where('label', $this->property)->first();
+        if (! $prop) {
             return false;
         }
-        $res = $this->schema->properties()->where('property_id', $property->id);
+        $res = $this->schema->properties()->where('property_id', $prop->id);
         if (! $res->count()) {
             
             // The property does not appear in the schema or inherited schemas

@@ -40,10 +40,12 @@ class PropertySchemaRequest extends ApiRequest
                 $this->addRule('min_cardinality', 'gte:0');
                 $this->addRule('max_cardinality', 'numeric');
                 $this->addRule('max_cardinality', 'nullable');
-                $this->addRule('max_cardinality', 'gte:1');
+                $this->addRule('max_cardinality', 'gte:0');
                 if ($this->get('max_cardinality')) {
                     $this->addRule('min_cardinality', 'lte:' . $this->get('max_cardinality'));
-                    $this->addRule('max_cardinality', 'gte:' . $this->get('min_cardinality'));
+                    if ($this->get('min_cardinality')) {
+                        $this->addRule('max_cardinality', 'gte:' . $this->get('min_cardinality'));
+                    }
                 }
                 $this->addRule('default_value', 'max:5000');
                 $this->addRule('*', 'bail');

@@ -12,21 +12,6 @@ class Value extends Model
     
     public static $except = ['available_type_id', 'item_id'];
     
-    /*
-    public $casts = ['value' => 'type'];
-    
-    protected function getCastType($key)
-    {
-        if ($key == 'value' and $this->type != Schema::THING_TYPE) {
-            if ($this->type == AvailableType::NUMBER_TYPE) {
-                return (int) $this->value;
-            }
-            return $this->type;
-        }
-        return parent::getCastType($key);
-    }
-    */
-    
     public function item()
     {
         return $this->belongsTo(Item::class);

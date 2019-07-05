@@ -104,7 +104,7 @@ Example usage:
         {
             "id": 48,
             "priority": 1
-        }
+    }
     ]
 }
 ```
@@ -225,13 +225,60 @@ For example:
 ```json
 {
     "schema_id": 53,
-    "label": "employee",
-    "comment": "Someone working for this organization.",
+    "property_id": 576,
     "types": [
+        {"type": "Text"}
+    ]
+}
+```
+So a new property *employee* has been created and assigned to the *Organization* schema supporting values of *Person* type items.
+#### Specified  property attributes for a schema
+One property in a schema can support some kind of restrictions and other features.
+These are optional parameters in the petition as listed:
+* **min_cardinality**: Indicates that in this property must be a number of values equal or greater than the specified number for the associated schema. By default there is not a minimum quantity.
+* **max_cardinality**: The property in this schema does not support a number of values greater than the given one. By default there is not limit.
+* **default_value**: If a value is created with empty content in this property, this default value will be use. By default values cannot be empty.
+* **order**: The order of the property in this schema. For presentation purposes.
+Here is an example of this attributes:
+> [POST] http://localhost/api/v1/property-schema
+```json
+{
+    "schema_id": 53,
+    "property_id": 576,
+    "types": [
+        {"type": "Text"}
+    ],
+    "min_cardinality": 1,
+    "max_cardinality": 20,
+    "default_value": "Default employe name",
+    "order": 2
+}
+```
+#### Updating a schema property
+To update the property attributes already defined in a schema, you must provide in the request petition the unique id of relation the schema-property.
+Use the endpoint with the PUT or PATCH method like this example:
+> [PUT] http://localhost/api/v1/property-schema/1747
+```json
+{
+    "comment": "Default employe name updated",
+    "min_cardinality": 0,
+    "max_cardinality": 0,
+    "default_value": null,
+    "order": 5
+}
+```
+Every attribute is optional. Use zero value to reset the cardinality restrictions to their default values.
+Also you can provide a list of available types to change the supported values in this property. For example:
+> [PATCH] http://localhost/api/v1/property-schema/1747
+```json
+{
+    "types": [
+        {"type": "Text"},
         {"type": "Thing", "schema_id": 45}
     ]
 }
 ```
+Remember that the old types **will be deleted**.
 
 
 #### The show parameter

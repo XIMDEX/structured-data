@@ -185,13 +185,6 @@ class Item extends Model
                     // No item defined for this value !
                     continue;
                 }
-                /*
-                if (! $value->referenceItem->schema->extends($value->availableType->schema)) {
-                    
-                    // Schema for item is different to property type !
-                    continue;
-                }
-                */
                 if (in_array($value->ref_item_id, $items) !== false || $depth === 0) {
                     
                     // We dont continue if the item has been showed before

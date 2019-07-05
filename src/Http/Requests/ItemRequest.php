@@ -72,11 +72,6 @@ class ItemRequest extends ApiRequest
                 $this->addRule('*', 'bail');
                 $this->addRule('properties.*', new ValueInAvailableTypeRule());
                 $this->addRule('properties.*', new ItemInAvailableTypeRule());
-                /*
-                $this->addRule('*', 'bail');
-                $this->addRule('properties.*', new MinCardinalityRule());
-                $this->addRule('properties.*', new MaxCardinalityRule());
-                */
             default:
                 break;
         }

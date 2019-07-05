@@ -22,9 +22,7 @@ class SchemaController extends Controller
     public function store(SchemaRequest $request)
     {
         $schema = Schema::create($request->all());
-        if ($this->assingSchemas($schema, $request)) {
-            
-        }
+        $this->assingSchemas($schema, $request);
         return $schema;
     }
     
