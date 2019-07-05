@@ -16,6 +16,7 @@ $ composer require ximdex/structured-data
 ```
 
 ## Usage
+You can visit our user guide [here](guide.md).
 
 ## Change log
 
@@ -33,11 +34,11 @@ Please see [contributing.md](contributing.md) for details and a todolist.
 
 ## Security
 
-If you discover any security related issues, please email ajlucena78@gmail.com instead of using the issue tracker.
+If you discover any security related issues, please email info@ximdex.com instead of using the issue tracker.
 
 ## Credits
 
-- [ajlucena78][link-author]
+- [ximdex][link-author]
 - [All Contributors][link-contributors]
 
 ## License

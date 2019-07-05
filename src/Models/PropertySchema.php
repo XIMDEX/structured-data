@@ -7,7 +7,7 @@ use Ximdex\StructuredData\Core\Model;
 
 class PropertySchema extends Model
 {
-    public $hidden = ['created_at', 'updated_at', 'property', 'property_id', 'schema', 'availableTypes', 'schema_id', 'version'];
+    public $hidden = ['created_at', 'updated_at', 'property', 'schema', 'availableTypes', 'version', 'schema_id', 'property_id'];
     
     public $appends = ['label', 'comment', 'schema_label', 'version_tag', 'types'];
     
@@ -110,5 +110,22 @@ class PropertySchema extends Model
         }
         unset($this->property);
         return parent::save($options);
+    }
+    
+    /**
+     * Delete and create new types for this property
+     * 
+     * @param array $types
+     */
+    public function assingTypes(array $types = null): void
+    {
+        if (! $types) {
+            return;
+        }
+        $this->availableTypes()->delete();
+        foreach ($types as $type) {
+            $type['property_schema_id'] = $this->id;
+            $this->availableTypes->add(AvailableType::create($type));
+        }
     }
 }

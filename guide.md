@@ -5,12 +5,14 @@ This document provide the installation process information and the API usage.
 ## Installation procedure
 First you need an instance of Laravel project in order to use this package. It can be downloaded from the Github repository located in https://github.com/laravel/laravel.
 Run composer to require our extension under your Laravel directory:
-> composer require ximdex/linked-data
-
+```shell
+composer require ximdex/linked-data
+```
 This command install the package in vendor extension.
 The next step is the database generation, so is needed to run the migration process for Laravel using the appropriate command for this purpose:
-> php artisan migrate
-
+```shell
+php artisan migrate
+```
 After this operation we have created the database tables in our project with the *strdata* prefix to avoid the previous table names collision.
 ## Basic usage example
 So at this time we can be able to consume the API operations to manage the schemas and items data.
@@ -34,9 +36,8 @@ php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 3.3`
 > If there is any schema definition created by a previous importation or by any user, this information will be update to the new version and only the absent definitions will be marked as obsolete. However we can still use this deprecated information later.
  
 Also it's possible to realize this importation using the next endpoint:
-```shell
-http://localhost/api/v1/schemas-import?url=https://schema.org/version/latest/schema.jsonld
-```
+> [GET] http://localhost/api/v1/schemas-import?url=https://schema.org/version/latest/schema.jsonld
+
 > We recommend to import always the latest version of the entire definitions from http://schema.org/version/latest/all-layers.jsonld resource. Visit http://schema.org for more details.
 
 ### Schema operations
@@ -167,17 +168,82 @@ A schema can be deleted using the DELETE method and the unique id of the schema 
 > [DELETE] http://localhost/api/v1/schema/1
 
 If the schema is already in use by any item, the operation will be denied.
+### Schema properties management
+We support some operations to maintenance the properties in use for the schemas.
+#### Create a new property
+You can associate a property to a schema using this function.
+To do this it's necessary to provide the schema unique id and the property unique id in order to make the relation. Also the type or list of types available must be present in this petition to define what king of type will support this property in this schema.
+Here is an example of usage:
+> [POST] http://localhost/api/v1/property-schema
+```json
+{
+    "schema_id": 53,
+    "property_id": 576,
+    "types": [
+        {"type": "Text"},
+        {"type": "Thing", "schema_id": 45}
+    ]
+}
+```
+The available types can be a simple type from given list:
+* Boolean
+* Date
+* DateTime
+* Time
+* Number
+* Text
+
+Or a type Thing including a schema id to support an item as value for this type. The above example shows that the *Organization* schema will support items of type *Person* for the property *employee*.
+Now we have created a type text and Person for this relation:
+```json
+{
+    "id": 1746,
+    "label": "employee",
+    "comment": "Someone working for this organization.",
+    "schema_label": "Organization",
+    "version_tag": null,
+    "types": [
+        {
+            "type": "Text",
+            "id": 2403,
+            "schema_label": null,
+            "version_tag": null
+        },
+        {
+            "type": "Thing",
+            "schema_id": 45,
+            "id": 2404,
+            "schema_label": "Person",
+            "version_tag": null
+        }
+    ]
+}
+```
+Sometimes you want to create a new property instead of use an existent one. It possible to send a property name and an optional comment to create both property and the relation to the desired schema.
+For example:
+> [POST] http://localhost/api/v1/property-schema
+```json
+{
+    "schema_id": 53,
+    "label": "employee",
+    "comment": "Someone working for this organization.",
+    "types": [
+        {"type": "Thing", "schema_id": 45}
+    ]
+}
+```
+
 
 #### The show parameter
 This argument can be used to show extra information in the desired item. It can contain some values separated by commas. Usage:
 > [GET] http://localhost/api/v1/item/1?show=deprecated,uid
 
 This is the list of values:
-* uid: show the unique id values for each element in the item.
-* deprecated: It's possible to retrieve the deprecated definitions like old version properties or types for this schema, using the *deprecated* value.
-* version: show the version unique id.
+* **uid**: show the unique id values for each element in the item.
+* **deprecated**: It's possible to retrieve the deprecated definitions like old version properties or types for this schema, using the *deprecated* value.
+* **version**: show the version unique id.
 
 
 ## Contributors
-Antonio Jesús Lucena [@ajlucena78](https://github.com/ajlucena78)
-David Arroyo [@davarresc](https://github.com/davarresc)
+Antonio Jesús Lucena [@ajlucena78](https://github.com/ajlucena78).
+David Arroyo [@davarresc](https://github.com/davarresc).

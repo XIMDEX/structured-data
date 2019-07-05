@@ -2,9 +2,11 @@
 
 namespace Ximdex\StructuredData\Requests;
 
+use Illuminate\Validation\Rule;
 use Ximdex\StructuredData\Models\Schema;
 use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Rules\SchemaPropertyDuplicationRule;
+use Ximdex\StructuredData\Models\AvailableType;
 
 class PropertySchemaRequest extends ApiRequest
 {   
@@ -22,6 +24,7 @@ class PropertySchemaRequest extends ApiRequest
                 $this->addRule('label', 'required_without:property_id');
                 $this->addRule('property_id', 'required_without:label');
                 $this->addRule('schema_id', 'required');
+                $this->addRule('types', 'required');
             case 'PUT':
             case 'PATCH':
                 $this->addRule('label', 'max:50');
@@ -49,6 +52,14 @@ class PropertySchemaRequest extends ApiRequest
                     $this->get('property_id'),
                     $this->get('label')
                 ));
+                $this->addRule('types', 'array');
+                $this->addRule('types.*.type', 'required');
+                $this->addRule('types.*.type', Rule::in(AvailableType::SIMPLE_TYPES));
+                $this->addRule('types.*.schema_id', 'required_if:types.*.type,' . Schema::THING_TYPE);
+                $this->addRule('types.*.schema_id', 'numeric');
+                $this->addRule('types.*.schema_id', 'gte:1');
+                $this->addRule('*', 'bail');
+                $this->addRule('types.*.schema_id', 'exists:' . (new Schema)->getTable() . ',id');
             default:
                 break;
         }

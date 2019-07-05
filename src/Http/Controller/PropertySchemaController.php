@@ -2,14 +2,15 @@
 
 namespace Ximdex\StructuredData\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Ximdex\StructuredData\Models\PropertySchema;
 use Ximdex\StructuredData\Requests\PropertySchemaRequest;
 
 class PropertySchemaController extends Controller
 {
-    public function avaliableTypes(PropertySchema $propSchema)
+    public function avaliableTypes(PropertySchema $property)
     {
-        return response()->json($propSchema->availableTypes);
+        return response()->json($property->availableTypes);
     }
     
     public function index()
@@ -17,29 +18,36 @@ class PropertySchemaController extends Controller
         return response()->json(PropertySchema::all());
     }
     
-    public function show(PropertySchema $propSchema)
+    public function show(PropertySchema $property)
     {
-        return response()->json($propSchema);
+        return response()->json($property);
     }
     
     public function store(PropertySchemaRequest $request)
     {
-        return PropertySchema::create($request->all());
+        DB::beginTransaction();
+        $property = PropertySchema::create($request->all());
+        $property->assingTypes($request->get('types'));
+        DB::commit();
+        return $property;
     }
     
-    public function update(PropertySchemaRequest $request, PropertySchema $propSchema)
+    public function update(PropertySchemaRequest $request, PropertySchema $property)
     {
-        if ($request->input('label') and $propSchema->label != $request->input('label')) {
+        if ($request->input('label') and $property->label != $request->input('label')) {
             
             // New property label was given
-            $propSchema->property_id = null;
+            $property->property_id = null;
         }
-        $propSchema->update($request->all());
-        return $propSchema;
+        DB::beginTransaction();
+        $property->update($request->all());
+        $property->assingTypes($request->get('types'));
+        DB::commit();
+        return $property;
     }
     
-    public function destroy(PropertySchema $propSchema)
+    public function destroy(PropertySchema $property)
     {
-        $propSchema->delete();
+        $property->delete();
     }
 }
