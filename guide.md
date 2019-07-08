@@ -365,18 +365,72 @@ Now the updated type support items of type Person schema:
     ]
 }
 ```
+### Items management
+An item is a group of values for an schema type. This values will be grouped in the schema properties according to the schema specifications like maximum and minimum number of values (cardinality) and supporting types in the properties available types.
+You can show the values of an item by the given unique item id, for example:
+> [GET] http://localhost/api/v1/item/1
 
-
-
-
+The response will be the JSON+LD code for the item with unique id 1, a type *Person*:
+```json
+{
+    "@context": "http://schema.org",
+    "@type": "Person",
+    "@id": "http://localhost/api/v1/item/1",
+    "name": "Antonio Jesús",
+    "email": "ajlucena@ximdex.net",
+    "knowsLanguage": [
+        "es",
+        "en"
+    ]
+}
+```
 #### The show parameter
 This argument can be used to show extra information in the desired item. It can contain some values separated by commas. Usage:
-> [GET] http://localhost/api/v1/item/1?show=deprecated,uid
+> [GET] http://localhost/api/v1/item/{id}?show=deprecated,uid
 
 This is the list of values:
 * **uid**: show the unique id values for each element in the item.
 * **deprecated**: It's possible to retrieve the deprecated definitions like old version properties or types for this schema, using the *deprecated* value.
 * **version**: show the version unique id.
+
+For example:
+> [GET] http://localhost/api/v1/item/1?show=deprecated,uid,version
+
+This petition retrieve the same information about the item values adding the unique id for each value as *@uid* property, the item unique id as *@item*, and the version of the schema importation as *@version*.
+```json
+{
+    "@context": "http://schema.org",
+    "@type": "Person",
+    "@id": "http://localhost/api/v1/item/1",
+    "@item": 1,
+    "@version": 5,
+    "@uid": 45,
+    "knowsLanguage": [
+        {
+            "@uid": 204,
+            "@version": 5,
+            "@value": "es"
+        },
+        {
+            "@uid": 205,
+            "@version": 5,
+            "@value": "en"
+        }
+    ],
+    "name": {
+        "@uid": 202,
+        "@version": 5,
+        "@value": "Antonio Jesús"
+    },
+    "email": {
+        "@uid": 203,
+        "@version": 5,
+        "@value": "ajlucena@ximdex.net"
+    }
+}
+```
+> Note that any property value for a simple type is specified in the *@value* attribute.
+
 
 
 ## Contributors
