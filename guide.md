@@ -170,6 +170,9 @@ A schema can be deleted using the DELETE method and the unique id of the schema 
 If the schema is already in use by any item, the operation will be denied.
 ### Schema properties management
 We support some operations to maintenance the properties in use for the schemas.
+#### Property information
+All the details from a property in a schema can be 
+
 #### Create a new property
 You can associate a property to a schema using this function.
 To do this it's necessary to provide the schema unique id and the property unique id in order to make the relation. Also the type or list of types available must be present in this petition to define what king of type will support this property in this schema.
@@ -250,10 +253,11 @@ Here is an example of this attributes:
     ],
     "min_cardinality": 1,
     "max_cardinality": 20,
-    "default_value": "Default employe name",
+    "default_value": "Default employee name",
     "order": 2
 }
 ```
+Now, this property will support only values in text mode, at least one value and a maximum of twenty values defined for an item. So the employee will have a number greater than one  and no more than twenty employees. Any employee with no name will be created with "Default employee name". 
 #### Updating a schema property
 To update the property attributes already defined in a schema, you must provide in the request petition the unique id of relation the schema-property.
 Use the endpoint with the PUT or PATCH method like this example:
@@ -279,6 +283,90 @@ Also you can provide a list of available types to change the supported values in
 }
 ```
 Remember that the old types **will be deleted**.
+### Property types manipulation
+Many times you need to change one type or add a new one to a property in a schema. If you don't want to specify all the types in the property update operation, to change the desired ones, it's possible to add or update separately.
+#### Type creation
+You need to provide the unique id for the relation between schema and property (property_schema_id), and the type to create:
+> [POST] http://locahost/api/v1/available-types
+property_schema_id: 1747
+type: Date
+
+At this time we have a new type supporting values of Date type.
+This operation will response a JSON code with the property containing the new type:
+```json
+{
+    "id": 1747,
+    "min_cardinality": 1,
+    "max_cardinality": 20,
+    "order": 2,
+    "default_value": "Default employee name",
+    "version_id": null,
+    "label": "employee",
+    "comment": "Someone working for this organization.",
+    "schema_label": "Organization",
+    "version_tag": null,
+    "types": [
+        {
+            "id": 2407,
+            "schema_id": null,
+            "type": "Date",
+            "version_id": null,
+            "schema_label": null,
+            "version_tag": null
+        },
+        {
+            "id": 2405,
+            "schema_id": null,
+            "type": "Text",
+            "version_id": null,
+            "schema_label": null,
+            "version_tag": null
+        }
+    ]
+}
+```
+#### Property types update
+To update the type attributes is needed to give the unique type id. For example we want to change the previous created type from *Date* to *Person* schema, in order to allow items of this type inside this *employee* property.
+To do this is necessary to provide the unique id for *Person* schema (45) and specify the *Thing* for type field:
+> [POST] http://locahost/api/v1/available-types/2407
+type: Thing
+schema_id: 45
+
+Now the updated type support items of type Person schema:
+```json
+{
+    "id": 1747,
+    "min_cardinality": 1,
+    "max_cardinality": 20,
+    "order": 2,
+    "default_value": "Default employee name",
+    "version_id": null,
+    "label": "employee",
+    "comment": "Someone working for this organization.",
+    "schema_label": "Organization",
+    "version_tag": null,
+    "types": [
+        {
+            "id": 2407,
+            "schema_id": 45,
+            "type": "Thing",
+            "version_id": null,
+            "schema_label": "Person",
+            "version_tag": null
+        },
+        {
+            "id": 2405,
+            "schema_id": null,
+            "type": "Text",
+            "version_id": null,
+            "schema_label": null,
+            "version_tag": null
+        }
+    ]
+}
+```
+
+
 
 
 #### The show parameter

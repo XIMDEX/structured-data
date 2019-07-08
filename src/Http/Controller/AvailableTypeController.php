@@ -4,6 +4,7 @@ namespace Ximdex\StructuredData\Controllers;
 
 use Ximdex\StructuredData\Models\AvailableType;
 use Ximdex\StructuredData\Requests\AvailableTypeRequest;
+use Ximdex\StructuredData\Models\PropertySchema;
 
 class AvailableTypeController extends Controller
 {   
@@ -20,17 +21,19 @@ class AvailableTypeController extends Controller
     
     public function store(AvailableTypeRequest $request)
     {
-        return AvailableType::create($request->all());
+        $availableType = AvailableType::create($request->all());
+        return PropertySchema::findOrFail($availableType->property_schema_id);
     }
     
     public function update(AvailableTypeRequest $request, AvailableType $availableType)
     {
         $availableType->update($request->all());
-        return $availableType;
+        return PropertySchema::findOrFail($availableType->property_schema_id);
     }
     
     public function destroy(AvailableType $availableType)
     {
         $availableType->delete();
+        return PropertySchema::findOrFail($availableType->property_schema_id);
     }
 }
