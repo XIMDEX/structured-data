@@ -384,7 +384,7 @@ The response will be the JSON+LD code for the item with unique id 1, a type *Per
     ]
 }
 ```
-#### The show parameter
+#### Using item show parameter
 This argument can be used to show extra information in the desired item. It can contain some values separated by commas. Usage:
 > [GET] http://localhost/api/v1/item/{id}?show=deprecated,uid
 
@@ -429,7 +429,45 @@ This petition retrieve the same information about the item values adding the uni
     }
 }
 ```
-> Note that any property value for a simple type is specified in the *@value* attribute.
+Note that any property value for a simple type is specified in the *@value* attribute.
+#### Exporting formats using the format parameter
+It's possible to express the item data in other language expressions with the format argument.
+##### Export item values to RDF/XML
+Show the item values in RDF/XML syntax.
+For example, the item defined as type Person will be exported as this syntax:
+> [GET] http://localhost/api/v1/item/1?format=rdf
+
+The result of this request operation will be:
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/">
+    <schema:Person rdf:about="http://ajlucena.com/laravel/public/index.php/api/v1/item/1">
+        <schema:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ajlucena@ximdex.net</schema:email>
+        <schema:knowsLanguage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">es</schema:knowsLanguage>
+        <schema:knowsLanguage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">en</schema:knowsLanguage>
+        <schema:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Antonio Jesús</schema:name>
+    </schema:Person>
+</rdf:RDF>
+```
+##### Export item values to *neo4j cypher* script
+If you want to import an item and its relations into a neo4j graph this option will be helpfully to do this.
+This format generate a list of commands in *cypher* language that be able to import in a neo4j project.
+> [GET] http://localhost/api/v1/item/1?format=neo4j
+
+The result of this request operation will be:
+```c
+MERGE (person1:Person {id:1})
+SET person1.knowsLanguage = ['es', 'en']
+SET person1.name = ['Antonio Jesús']
+SET person1.email = ['ajlucena@ximdex.net']
+MERGE (person4:Person {id:4})
+SET person4.name = ['David']
+SET person4.email = ['darroyo@ximdex.com']
+MERGE (person1)-[:KNOWS]->(person4)
+RETURN person1
+```
+This result in a creation of two nodes *Person* with the given attributes and the relation *KNOWS* between them:
+![A nodes relation graph in neo4j](https://github.com/XIMDEX/structured-data/doc/images/nodes-neo4j.png)
 
 
 
