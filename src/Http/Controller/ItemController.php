@@ -78,7 +78,7 @@ class ItemController extends Controller
         }
         
         // Update the item properties values
-        $item->loadValuesFromProperties($request->properties);
+        $item->loadValuesFromProperties((array) $request->properties);
         $item->push();
         
         // Save item data

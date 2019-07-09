@@ -190,7 +190,7 @@ class Item extends Model
                     // We dont continue if the item has been showed before
                     $referenceItem = $value->referenceItem->reference();
                 } else {
-                    $referenceItem = $value->referenceItem->itemToSchema($show, $depth - 1, $items);
+                    $referenceItem = $value->referenceItem->itemToSchema([], $depth - 1, $items);
                 }
                 if (! $referenceItem) {
                     

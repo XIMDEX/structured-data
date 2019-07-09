@@ -377,7 +377,7 @@ The response will be the JSON+LD code for the item with unique id 1, a type *Per
     "@type": "Person",
     "@id": "http://localhost/api/v1/item/1",
     "name": "Antonio Jesús",
-    "email": "ajlucena@ximdex.net",
+    "email": "antoniojesus@ximdex.net",
     "knowsLanguage": [
         "es",
         "en"
@@ -425,7 +425,7 @@ This petition retrieve the same information about the item values adding the uni
     "email": {
         "@uid": 203,
         "@version": 5,
-        "@value": "ajlucena@ximdex.net"
+        "@value": "antoniojesus@ximdex.net"
     }
 }
 ```
@@ -441,8 +441,8 @@ The result of this request operation will be:
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/">
-    <schema:Person rdf:about="http://ajlucena.com/laravel/public/index.php/api/v1/item/1">
-        <schema:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ajlucena@ximdex.net</schema:email>
+    <schema:Person rdf:about="http://localhost/api/v1/item/1">
+        <schema:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">antoniojesus@ximdex.net</schema:email>
         <schema:knowsLanguage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">es</schema:knowsLanguage>
         <schema:knowsLanguage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">en</schema:knowsLanguage>
         <schema:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Antonio Jesús</schema:name>
@@ -455,22 +455,130 @@ This format generate a list of commands in *cypher* language that be able to imp
 > [GET] http://localhost/api/v1/item/1?format=neo4j
 
 The result of this request operation will be:
-```c
+```
 MERGE (person1:Person {id:1})
 SET person1.knowsLanguage = ['es', 'en']
 SET person1.name = ['Antonio Jesús']
-SET person1.email = ['ajlucena@ximdex.net']
+SET person1.email = ['antoniojesus@ximdex.net']
 MERGE (person4:Person {id:4})
 SET person4.name = ['David']
-SET person4.email = ['darroyo@ximdex.com']
+SET person4.email = ['david@ximdex.net']
 MERGE (person1)-[:KNOWS]->(person4)
 RETURN person1
 ```
 This result in a creation of two nodes *Person* with the given attributes and the relation *KNOWS* between them:
-![A nodes relation graph in neo4j](https://github.com/XIMDEX/structured-data/doc/images/nodes-neo4j.png)
+![A nodes relation graph in neo4j](https://raw.githubusercontent.com/XIMDEX/structured-data/master/doc/images/nodes-neo4j.png)
+### Items manipulation
+The values of an item can be create or update thrown the item management endpoint.
+Basically the petition will contain the unique item id in the update operation, or the unique schema id in creation process.
+The rest of the data needed is the values for the properties to create the content of the item.
+#### Item creation
+So, if you want to **create a new item** based on the *Corporation* schema with a minimal amount of data (corporate name and contact email), the request will be:
+> [POST] http://localhost/api/v1/item
+```json
+{
+    "schema_id": "411",
+    "properties": {
+        "name": {"type": 350, "values": ["Open Ximdex"]},
+        "email": {"type": 983, "values": ["contact@ximdex.net"]}
+    }
+}
+```
+Note that with each property we will provide the available type id for the supported by such property in the *Organization* schema, and values for this type always is an array, even is the element only can contain a simple value.
+> Remember that you can obtain information about this types retrieving the entire schema properties specification. For example in this case:
+> [GET] http://localhost/api/v1/schema/411
 
+The success result of this operation will response the new created item:
+```json
+{
+    "schema_id": "411",
+    "id": 9,
+    "schema_url": "http://localhost/api/v1/item/9",
+    "schema_label": "Corporation",
+    "values": [
+        {
+            "available_type_id": 350,
+            "value": "Open Ximdex",
+            "ref_item_id": null,
+            "position": 1,
+            "id": 211
+        },
+        {
+            "available_type_id": 983,
+            "value": "info@ximdex.com",
+            "ref_item_id": null,
+            "position": 1,
+            "id": 212
+        }
+    ]
+}
+```
+#### Item update
+Now, we have an item named 'Open Ximdex' of type *Corporation*. And we need to **update** the contact email and add some extra information, like two employees and the country address.
+The above example shows how can do that:
+> [PATCH] http://localhost/api/v1/item/9
+```json
+{
+    "properties": {
+        "email": {"type": 983, "values": [{"id": 212, "value": "new-contact-email@ximdex.net"}]},
+        "employee": {"type": 2407, "values": [2, 4]}
+    }
+}
+```
+Remember that if you don't specify the previous value id, a new email will be added to the email property.
+> Use the show argument to know the unique id corresponding to the values of the item to update or delete.
+> [GET] http://localhost/api/v1/item/9?show=uid
 
+So now we have a *Corporation* item with a relation with many *Person* items through the *employee* property:
+```json
+{
+    "@context": "http://schema.org",
+    "@type": "Corporation",
+    "@id": "http://localhost/api/v1/item/9",
+    "name": "Open Ximdex",
+    "email": "new-contact-email@ximdex.net",
+    "employee": [
+        {
+            "@type": "Person",
+            "@id": "http://localhost/api/v1/item/2",
+            "name": "Antonio Jesús",
+            "email": "antoniojesus@ximdex.net"
+        },
+        {
+            "@type": "Person",
+            "@id": "http://localhost/api/v1/item/4",
+            "name": "David",
+            "email": "david@ximdex.net"
+        }
+    ]
+}
+```
+If you want to delete a value from this item, for example the employee called David, we can use the delete argument to remove only this value:
+> [PATCH] http://localhost/api/v1/item/9
+```json
+{
+    "delete": [214]
+}
+```
+Many property values can be removed expressing a list of unique values id in this attribute, and can be sent with other properties.
+A whole property values can be removed specifying the *delete* attribute instead of the unique id list. For example, if we want to remove all the employees for our item previously created, we will use the argument *delete* in the corresponding item property:
+> [PATCH] http://localhost/api/v1/item/9
+```json
+{
+    "properties": {
+        "employee": {"type": 2407, "values": [], "delete": true}
+    }
+}
+```
+Only the values type *Person* (2407) will be removed in the *employee* property.
+> If you send any value in the *values* attribute, then these values will replace the previous ones.
+#### Item deletion
+All data for an item can be removed using its unique id. The possible related items don't will be deleted, but the relations with other items will disappear.
+Usage:
+> [DELETE] http://localhost/api/v1/item/9
+
+Do this with carefully, this operation cannot be undone.
 
 ## Contributors
-Antonio Jesús Lucena [@ajlucena78](https://github.com/ajlucena78).
-David Arroyo [@davarresc](https://github.com/davarresc).
+* Antonio Jesús Lucena [@ajlucena78](https://github.com/ajlucena78).
+* David Arroyo [@davarresc](https://github.com/davarresc).

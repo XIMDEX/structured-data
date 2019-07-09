@@ -16,7 +16,7 @@ $ composer require ximdex/structured-data
 ```
 
 ## Usage
-You can visit our user guide [here](guide.md).
+You can visit our user guide [here](./doc/guide.md).
 
 ## Change log
 
