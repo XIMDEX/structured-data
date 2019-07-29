@@ -408,8 +408,12 @@ Many times you need to change one type or add a new one to a property in a schem
 You need to provide the unique id for the relation between schema and property (property_schema_id), and the type to create:
 
 > [POST] http://locahost/api/v1/available-types
-> property_schema_id: 1747
-> type: Date
+```json
+{
+    "property_schema_id": 1747,
+    "type": "Date"
+}
+```
 
 At this time we have a new type supporting values of Date type.
 
@@ -457,8 +461,12 @@ For example we want to change the previous created type from *Date* to *Person* 
 To do this is necessary to provide the unique id for *Person* schema (45) and specify the *Thing* for type field:
 
 > [POST] http://locahost/api/v1/available-types/2407
-> type: Thing
-> schema_id: 45
+```json
+{
+    "type": "Thing",
+    "schema_id": 45
+}
+```
 
 Now the updated type support items of type Person schema:
 
@@ -469,27 +477,20 @@ Now the updated type support items of type Person schema:
     "max_cardinality": 20,
     "order": 2,
     "default_value": "Default employee name",
-    "version_id": null,
     "label": "employee",
-    "comment": "Someone working for this organization.",
     "schema_label": "Organization",
-    "version_tag": null,
     "types": [
         {
             "id": 2407,
             "schema_id": 45,
             "type": "Thing",
-            "version_id": null,
-            "schema_label": "Person",
-            "version_tag": null
+            "schema_label": "Person"
         },
         {
             "id": 2405,
             "schema_id": null,
             "type": "Text",
-            "version_id": null,
-            "schema_label": null,
-            "version_tag": null
+            "schema_label": null
         }
     ]
 }
@@ -652,6 +653,7 @@ So, if you want to create a new item based on the *Corporation* schema with a mi
 Note that with each property we will provide the available type id for the supported by such property in the *Organization* schema, and values for this type always is an array, even is the element only can contain a simple value.
 
 > Remember that you can obtain information about this types retrieving the entire schema properties specification. For example in this case:
+>
 > [GET] http://localhost/api/v1/schema/411
 
 The success result of this operation will response the new created item:
@@ -700,6 +702,7 @@ The above example shows how can do that:
 Remember that if you don't specify the previous value id, a new email will be added to the email property.
 
 > Use the show argument to know the unique id corresponding to the values of the item to update or delete:
+> 
 > [GET] http://localhost/api/v1/item/9?show=uid
 
 So now we have a *Corporation* item with a relation with many *Person* items through the *employee* property:
