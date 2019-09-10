@@ -41,7 +41,7 @@ First you need an instance of Laravel project in order to use this package. It c
 Run composer to require our extension under your Laravel directory:
 
 ```shell
-composer require ximdex/linked-data
+composer require ximdex/structured-data
 ```
 
 This command install the package in vendor extension.
