@@ -72,7 +72,7 @@ Operations over schemas an items data give you a complete control to create or u
 For a brand new installation, there are not any schema to work with. To import a schema definitions URL provided by schema.org you can run this console command under the Laravel directory:
 
 ```shell
-php artisan schemas:import http://schema.org/version/latest/schema.jsonld
+php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld
 ```
 
 > Actually this command only support schemas.org definitions in JSON+LD format.
