@@ -4,6 +4,10 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 API to manage structured data schemas and related website content.
+This API facilitates CRUD operations for managing entities based on a Schema.org schema. It enables users to create, read, update, and delete entities within the specified schema, providing a streamlined approach to structured data management.
+
+
+
 
 ## Installation
 
