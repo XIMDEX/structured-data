@@ -160,7 +160,7 @@ class Item extends Model
         return $query . 'RETURN ' . Str::camel($result['@type']) . $result['@item'];
     }
     
-    protected function itemToSchema(array $show, int $depth = null, array & $items = []): array
+    protected function itemToSchema(array $show, ?int $depth = null, array &$items = []): array
     {
         $properties = [];
         if (in_array($this->id, $items) === false) {
@@ -235,7 +235,7 @@ class Item extends Model
      * @param array $data
      * @return string|array
      */
-    private function addExtraInfoToValue(Value $value, array $show, array $data = null)
+    private function addExtraInfoToValue(Value $value, array $show, ?array $data = null)
     {
         if ($data === null) {
             $data = [];

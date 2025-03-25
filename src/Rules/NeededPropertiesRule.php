@@ -11,7 +11,7 @@ class NeededPropertiesRule implements Rule
     
     private $property;
     
-    public function __construct(int $schema = null)
+    public function __construct(?int $schema = null)
     {
         $this->schema = Schema::findOrFail($schema);
     }

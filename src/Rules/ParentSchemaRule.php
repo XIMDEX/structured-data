@@ -9,7 +9,7 @@ class ParentSchemaRule implements Rule
 {
     private $id;
     
-    public function __construct(int $id = null)
+    public function __construct(?int $id = null)
     {
         $this->id = $id;
     }

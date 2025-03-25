@@ -12,7 +12,7 @@ class SchemaPropertyDuplicationRule implements Rule
     
     private $property;
     
-    public function __construct(int $schema = null, int $property = null, string $label = null)
+    public function __construct(?int $schema = null, ?int $property = null, ?string $label = null)
     {
         $this->schema = $schema;
         if (! $property) {

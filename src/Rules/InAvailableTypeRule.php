@@ -13,7 +13,7 @@ abstract class InAvailableTypeRule implements Rule
     
     protected $supportMultiValidation = false;
     
-    public function __construct(int $availableTypeId = null)
+    public function __construct(?int $availableTypeId = null)
     {
         if ($availableTypeId) {
             $this->availableType = AvailableType::findOrFail($availableTypeId);

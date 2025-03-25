@@ -9,7 +9,7 @@ class AvailableTypeThingRule implements Rule
 {
     private $schema;
     
-    public function __construct(int $schema = null)
+    public function __construct(?int $schema = null)
     {
         $this->schema = $schema;
     }
