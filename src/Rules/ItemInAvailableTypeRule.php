@@ -2,6 +2,7 @@
 
 namespace Ximdex\StructuredData\Rules;
 
+use Closure;
 use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Models\Schema;
 
@@ -57,5 +58,49 @@ class ItemInAvailableTypeRule extends InAvailableTypeRule
         }
         return "The :attribute value must be or extends a type @{$this->availableType->schema_label} for "
             . "{$this->availableType->propertySchema->label} property";
+    }
+
+
+    /**
+     * Fix deprecated \Illuminate\Contracts\Validation\Rule
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void{
+        if (parent::passes($attribute, $value) === false) {
+            $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
+            . '{$this->availableType->propertySchema->label} property');
+            return;
+        }
+        $value = $this->value;
+        if ($this->availableType->type != Schema::THING_TYPE) {
+            
+            // TODO can't return this if void
+
+            // Type only support an item
+            // return $this->supportMultiValidation;
+        }
+        foreach ($value as $id) {
+            
+            // If value contains the type, get only the value given
+            if (is_array($id)) {
+                $id = $id['values'];
+            }
+            if (! is_numeric($id)) {
+                $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
+                . '{$this->availableType->propertySchema->label} property');
+                return;
+            }
+            $item = Item::find($id);
+            if (! $item) {
+                $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
+                . '{$this->availableType->propertySchema->label} property');
+                return;
+            }
+            if (! $item->schema->extends($this->availableType->schema)) {
+                // The schemas for the given item are not supported for this available type
+                $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
+                . '{$this->availableType->propertySchema->label} property');
+            return;
+            }
+        }
     }
 }
