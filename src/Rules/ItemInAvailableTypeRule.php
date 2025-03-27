@@ -2,9 +2,10 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Closure;
 use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Models\Schema;
+use Closure;
+use Illuminate\Support\Facades\Validator;
 
 class ItemInAvailableTypeRule extends InAvailableTypeRule
 {   
@@ -14,72 +15,77 @@ class ItemInAvailableTypeRule extends InAvailableTypeRule
      * {@inheritDoc}
      * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::passes()
      */
-    public function passes($attribute, $value)
-    {
-        if (parent::passes($attribute, $value) === false) {
-            return false;
-        }
-        $value = $this->value;
-        if ($this->availableType->type != Schema::THING_TYPE) {
+    // public function passes($attribute, $value)
+    // {
+    //     if (parent::passes($attribute, $value) === false) {
+    //         return false;
+    //     }
+    //     $value = $this->value;
+    //     if ($this->availableType->type != Schema::THING_TYPE) {
             
-            // Type only support an item
-            return $this->supportMultiValidation;
-        }
-        foreach ($value as $id) {
+    //         // Type only support an item
+    //         return $this->supportMultiValidation;
+    //     }
+    //     foreach ($value as $id) {
             
-            // If value contains the type, get only the value given
-            if (is_array($id)) {
-                $id = $id['values'];
-            }
-            if (! is_numeric($id)) {
-                return false;
-            }
-            $item = Item::find($id);
-            if (! $item) {
-                return false;
-            }
-            if (! $item->schema->extends($this->availableType->schema)) {
+    //         // If value contains the type, get only the value given
+    //         if (is_array($id)) {
+    //             $id = $id['values'];
+    //         }
+    //         if (! is_numeric($id)) {
+    //             return false;
+    //         }
+    //         $item = Item::find($id);
+    //         if (! $item) {
+    //             return false;
+    //         }
+    //         if (! $item->schema->extends($this->availableType->schema)) {
 
-                // The schemas for the given item are not supported for this available type
-                return false;
-            }
-        }
-        return true;
-    }
+    //             // The schemas for the given item are not supported for this available type
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
     /**
      * {@inheritDoc}
      * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::message()
      */
-    public function message()
-    {
-        if (! $this->availableType) {
-            return parent::message();
-        }
-        return "The :attribute value must be or extends a type @{$this->availableType->schema_label} for "
-            . "{$this->availableType->propertySchema->label} property";
-    }
+    // public function message()
+    // {
+    //     if (! $this->availableType) {
+    //         return parent::message();
+    //     }
+    //     return "The :attribute value must be or extends a type @{$this->availableType->schema_label} for "
+    //         . "{$this->availableType->propertySchema->label} property";
+    // }
 
 
     /**
      * Fix deprecated \Illuminate\Contracts\Validation\Rule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void{
-        if (parent::passes($attribute, $value) === false) {
+        $data = ['attribute' => $value];
+        $validator = Validator::make($data, [
+            'attribute' => [new InAvailableTypeRule]
+        ]);
+
+        if ($validator->fails()) {
             $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
             . '{$this->availableType->propertySchema->label} property');
             return;
         }
         $value = $this->value;
         if ($this->availableType->type != Schema::THING_TYPE) {
-            
-            // TODO can't return this if void
-
             // Type only support an item
-            // return $this->supportMultiValidation;
+            if(!$this->supportMultiValidation){
+                $fail('The :attribute value must be or extends a type @{$this->availableType->schema_label} for '
+                . '{$this->availableType->propertySchema->label} property');
+                return;
+            }
         }
         foreach ($value as $id) {
-            
             // If value contains the type, get only the value given
             if (is_array($id)) {
                 $id = $id['values'];
