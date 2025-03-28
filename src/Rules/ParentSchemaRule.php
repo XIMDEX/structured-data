@@ -6,6 +6,7 @@ namespace Ximdex\StructuredData\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Ximdex\StructuredData\Models\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class ParentSchemaRule implements ValidationRule
 {
@@ -68,7 +69,13 @@ class ParentSchemaRule implements ValidationRule
             if ($schema->schemas->isEmpty()) {
                 continue;
             }
-            if ($this->passes($attribute, $schema->schemas->toArray()) === false) {
+
+            $data = ['attribute' => $schema->schemas->toArray()];
+            $validator = Validator::make($data, [
+                'attribute' => [new ParentSchemaRule()]
+            ]);
+
+            if ($validator->fails()) {
                 $fail('The :attribute cannot be associated as its own parent');
                 return;
             }
