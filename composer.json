@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ximdex\\StructuredData\\": "src/"
+            "Ximdex\\StructuredData\\": "structured-data/src/"
         }
     },
     "autoload-dev": {
