@@ -2,7 +2,7 @@
 
 This is an API service for structured data management and maintenance. Written in PHP as a package for Laravel framework.
 
-This document provide the installation process information and the API usage.
+This document provides the installation process information and the API usage.
 
 ## Table of contents
 
@@ -11,7 +11,7 @@ This document provide the installation process information and the API usage.
 - [API endpoints specification](#api-endpoints-specification)
   * [Schemas importation](#schemas-importation)
   * [Schema operations](#schema-operations)
-    + [Retrieve a concrete schema](#retrieve-a-concrete-schema)
+    + [Retrieve a specific schema](#retrieve-a-specific-schema)
     + [Schema creation](#schema-creation)
     + [Updating a schema](#updating-a-schema)
     + [Schema deletion](#schema-deletion)
@@ -44,7 +44,7 @@ Run composer to require our extension under your Laravel directory:
 composer require ximdex/structured-data
 ```
 
-This command install the package in vendor extension.
+This command installs the package in vendor extension.
 The next step is the database generation, so is needed to run the migration process for Laravel using the appropriate command for this purpose:
 
 ```shell
@@ -55,13 +55,13 @@ After this operation we have created the database tables in our project with the
 
 ## Basic usage example
 
-So at this time we can be able to consume the API operations to manage the schemas and items data.
+So at this time we are able to consume the API operations to manage the schemas and items data.
 
-We assume in this manual that the host for our Laravel instance is under a host named localhost. Then we call the endpoint whit this example usage:
+We assume in this manual that the host for our Laravel instance is under a host named localhost. Then we call the endpoint with this example usage:
 
 > [GET] http://localhost/api/v1/schema
 
-This petition will retrieve a JSON code with all the schemas that are actually created in our storage. 
+This request will retrieve a JSON code with all the schemas that are actually created in our storage. 
 
 ## API endpoints specification
 
@@ -69,7 +69,7 @@ Operations over schemas an items data give you a complete control to create or u
 
 ### Schemas importation
 
-For a brand new installation, there are not any schema to work with. To import a schema definitions URL provided by schema.org you can run this console command under the Laravel directory:
+For a brand new installation, there are no schemas to work with. To import a schema definitions URL provided by schema.org you can run this console command under the Laravel directory:
 
 ```shell
 php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld
@@ -80,13 +80,13 @@ php artisan schemas:import https://schema.org/version/latest/schemaorg-current-h
 If the given URL does not contain the schema definitions version you can provide by another argument:
 
 ```shell
-php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 3.3`
+php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 3.3
 ```
 
-> If there is any schema definition created by a previous importation or by any user, this information will be update to the new version and only the absent definitions will be marked as obsolete.
+> If there is any schema definition created by a previous importation or by any user, this information will be updated to the new version and only the absent definitions will be marked as obsolete.
 > However we can still use this deprecated information later.
  
-Also it's possible to realize this importation using the next endpoint:
+Also it's possible to perform this import using the following endpoint:
 
 > [GET] http://localhost/api/v1/schemas-import?url=https://schema.org/version/latest/schema.jsonld
 
@@ -94,15 +94,15 @@ Also it's possible to realize this importation using the next endpoint:
 
 ### Schema operations
 
-Each schema is a type of item that contain a variable number of properties and inheritance any more from other parent schemas.
+Each schema is a type of item that contains a variable number of properties and can inherit additional properties from a parent schema.
 
-#### Retrieve a concrete schema
+#### Retrieve a specific schema
 
 You can use the schema unique id to load the schema attributes, its properties and the other schemas that are inherited. Usage:
 
 > [GET] http://localhost/api/v1/schema/45
 
-The result of this request will be a JSON code with the definition of a schema identified with number 45, in this example the *Person* schema:
+The result of this request will be a JSON object containing the definition of a schema identified by the number 45, in this example the *Person* schema:
 
 ```json
 {
@@ -148,13 +148,13 @@ The result of this request will be a JSON code with the definition of a schema i
 }
 ```
 
-We can see all the properties and the available types to each one for the type *Person* and the inherited schemas given in the "schemas" node. In this example the properties from the *Thing* schema.
+We can see all the properties and their available types for the *Person* type and their inherited schemas listed in the "schemas" node. In this example, some of the properties come from the *Thing* schema.
 
 #### Schema creation
 
-New schemas can be created by a given label name and optional comment. If this name is in use, the operation will be canceled. 
+New schemas can be created with a given label name and an optional comment. If this name is already in use, the operation will be canceled. 
 
-If the schema extends another schemas attributes, you can use the optional parameter *schemas* to send a list of unique id schemas and the priority of those. This last argument is optional.
+If the schema extends the attributes of other schemas, you can use the optional parameter *schemas* to send a list of unique id schemas and their priority. This last argument is optional.
 
 Example usage:
 
@@ -183,9 +183,9 @@ The result of this operation will be the created schema containing the new uniqu
 }
 ```
 
-> User schemas don't have a version (*null* value instead), so always be ready to use in future imported versions.
+> User schemas don't have a version (*null* value instead), so they are always ready to be used in future imported versions.
 
-This is an example of a response error that happens when  you try to create a schema with a name already in use:
+This is an example of a response error that happens when you try to create a schema with a name already in use:
 
 ```json
 {
@@ -198,10 +198,10 @@ This is an example of a response error that happens when  you try to create a sc
 }
 ```
 
-This is the common format for any error in a manage operation. Look that you can give too many errors with different post fields.
+This is the common format for any error in a management operation. Note that you can have multiple errors with different POST fields.
 
 #### Updating a schema
-Similar to the creation of a new schema, the only difference is the inclusion of the unique id of the schema to edit in the request operation, and the usage of PUT of PATCH method instead of POST.
+Similar to the creation of a new schema, the only difference is the inclusion of the unique id of the schema to edit in the request operation, and the usage of either the PUT or PATCH method instead of POST.
 
 > [PATCH] http://localhost/api/v1/schema/1
 ```json
@@ -210,8 +210,8 @@ Similar to the creation of a new schema, the only difference is the inclusion of
 }
 ```
 
-The label parameter (or each you use with minimum cardinality equal or greater to one) is required is you use the PUT method.
-With the above example using PUT instead of PATCH the response will be:
+The label parameter (or each one you use with a minimum cardinality equal or greater to one) is required if you use the PUT method.
+In the example above, using PUT instead of PATCH, the response will be:
 
 ```json
 {
@@ -224,7 +224,7 @@ With the above example using PUT instead of PATCH the response will be:
 }
 ```
 
-Like in the creation operation, it's possible to send a list schemas to change the properties schema inheritance. This argument is optional, but if it's used, the relation with any schemas previously associated will be removed and replaced with the given ones.
+Like in the creation operation, it's possible to send a list of schemas to change the properties schema inheritance. This argument is optional, but if it's used, the relationship with any schemas previously associated will be removed and replaced with the given ones.
 For example:
 
 > [PATCH] http://localhost/api/v1/schema/1
@@ -239,7 +239,7 @@ For example:
 }
 ```
 
-Now our schema with unique id 1 will extends the Person schema with priority 1.
+Now our schema with unique id 1 will extend the Person schema with priority 1.
 
 #### Schema deletion
 
@@ -251,16 +251,16 @@ If the schema is already in use by any item, the operation will be denied.
 
 ### Schema properties management
 
-We support some operations to maintenance the properties in use for the schemas.
+We support some operations to manage the properties in use for the schemas.
 
 #### Property information
-All the details from a property in a schema can be 
+All the details from a property in a schema can be modified. 
 
 #### Create a new property
 
 You can associate a property to a schema using this function.
-To do this it's necessary to provide the schema unique id and the property unique id in order to make the relation.
-Also the type or list of types available must be present in this petition to define what king of type will support this property in this schema.
+To do this it's necessary to provide the schema unique id and the property unique id in order to create the relationship.
+Also the type or list of types available must be present in this request to define what kind of type will support this property in this schema.
 
 Here is an example of usage:
 
@@ -276,7 +276,7 @@ Here is an example of usage:
 }
 ```
 
-The available types can be a simple type from given list:
+The available types can be a simple type from the following list:
 * Boolean
 * Date
 * DateTime
@@ -285,9 +285,9 @@ The available types can be a simple type from given list:
 * Text
 
 Or a type Thing including a schema id to support an item as value for this type.
-The above example shows that the *Organization* schema will support items of type *Person* for the property *employee*.
+The example above shows that the *Organization* schema will support items of type *Person* for the property *employee*.
 
-Now we have created a type text and Person for this relation:
+Now we have created a type text and Person for this relationship:
 
 ```json
 {
@@ -314,7 +314,7 @@ Now we have created a type text and Person for this relation:
 }
 ```
 
-Sometimes you want to create a new property instead of use an existent one. It possible to send a property name and an optional comment to create both property and the relation to the desired schema.
+Sometimes you want to create a new property instead of using an existing one. It is possible to send a property name and an optional comment to create both the property and the relationship to the specified schema.
 
 For example:
 
@@ -333,11 +333,11 @@ So a new property *employee* has been created and assigned to the *Organization*
 
 #### Specified property attributes for a schema
 
-One property in a schema can support some kind of restrictions and other features.
+A property in a schema can support some kind of restrictions and other features.
 
-These are optional parameters in the petition as listed:
+These are optional parameters in the request as listed:
 
-* **min_cardinality**: Indicates that in this property must be a number of values equal or greater than the specified number for the associated schema. By default there is not a minimum quantity.
+* **min_cardinality**: Specifies that there must be a number of values in this property equal to or greater than the specified number for the associated schema. By default there is not a minimum quantity.
 
 * **max_cardinality**: The property in this schema does not support a number of values greater than the given one. By default there is not limit.
 
@@ -362,13 +362,13 @@ Here is an example of these attributes:
 }
 ```
 
-Now, this property will support only values in text mode, at least one value and a maximum of twenty values defined for an item. So the employee will have a number greater than one  and no more than twenty employees.
+Now, this property will support only values in text mode, at least one value and a maximum of twenty values defined for an item. So the employee will have a number greater than one and no more than twenty employees.
 
 Any employee with no name will be created with "Default employee name". 
 
 #### Updating a schema property
 
-To update the property attributes already defined in a schema, you must provide in the request petition the unique id of relation the schema-property.
+To update the property attributes already defined in a schema, you must include the unique id of the schema-property relationship in the request.
 
 Use the endpoint with the PUT or PATCH method like this example:
 
@@ -401,11 +401,11 @@ Remember that the old types **will be deleted**.
 
 ### Property types manipulation
 
-Many times you need to change one type or add a new one to a property in a schema. If you don't want to specify all the types in the property update operation, to change the desired ones, it's possible to add or update separately.
+Often, you need to change a type or add a new one to a property in a schema. If you don't want to specify all the types in the property update operation, to change the desired ones, it's possible to add or update separately.
 
 #### Type creation
 
-You need to provide the unique id for the relation between schema and property (property_schema_id), and the type to create:
+You need to provide the unique id for the relationship between the schema and the property (property_schema_id), and the type to create:
 
 > [POST] http://locahost/api/v1/available-types
 ```json
@@ -417,7 +417,7 @@ You need to provide the unique id for the relation between schema and property (
 
 At this time we have a new type supporting values of Date type.
 
-This operation will response a JSON code with the property containing the new type:
+This operation will return a JSON object with the property containing the new type:
 
 ```json
 {
@@ -454,11 +454,11 @@ This operation will response a JSON code with the property containing the new ty
 
 #### Property types update
 
-To update the type attributes is needed to give the unique type id.
+To update the type attributes is necessary to include the unique type id.
 
-For example we want to change the previous created type from *Date* to *Person* schema, in order to allow items of this type inside this *employee* property.
+For example, we want to change the previous created type from *Date* to *Person* schema, in order to allow items of this type as this *employee* property.
 
-To do this is necessary to provide the unique id for *Person* schema (45) and specify the *Thing* for type field:
+To do this it is necessary to provide the unique id for the *Person* schema (45) and specify the *Thing* for the type field:
 
 > [POST] http://locahost/api/v1/available-types/2407
 ```json
@@ -468,7 +468,7 @@ To do this is necessary to provide the unique id for *Person* schema (45) and sp
 }
 ```
 
-Now the updated type support items of type Person schema:
+Now the updated type support items of type Person schema looks like this:
 
 ```json
 {
@@ -498,13 +498,13 @@ Now the updated type support items of type Person schema:
 
 ### Items management
 
-An item is a group of values for an schema type. This values will be grouped in the schema properties according to the schema specifications like maximum and minimum number of values (cardinality) and supporting types in the properties available types.
+An item is a group of values for an schema type. These values will be grouped in the schema properties according to the schema specifications, like maximum and minimum number of values (cardinality) and supporting types in the properties available types.
 
-You can show the values of an item by the given unique item id, for example:
+You can retrieve the values of an item for its unique item id, for example:
 
 > [GET] http://localhost/api/v1/item/1
 
-The response will be the JSON+LD code for the item with unique id 1, a type *Person*:
+The response will be a JSON+LD object for the item with unique id 1, a type *Person*:
 
 ```json
 {
@@ -522,7 +522,7 @@ The response will be the JSON+LD code for the item with unique id 1, a type *Per
 
 #### Using item show parameter
 
-This argument can be used to show extra information in the desired item. It can contain some values separated by commas. 
+This argument can be used to show extra information about the specified item. It can contain a list of values separated by commas. 
 
 Usage:
 
@@ -540,7 +540,7 @@ For example:
 
 > [GET] http://localhost/api/v1/item/1?show=deprecated,uid,version
 
-This petition retrieve the same information about the item values adding the unique id for each value as *@uid* property, the item unique id as *@item*, and the version of the schema importation as *@version*.
+This request retrieves the same information about the item values, adding the unique id for each value as *@uid* property, the item unique id as *@item*, and the version of the schema import as *@version*.
 
 ```json
 {
@@ -581,7 +581,7 @@ Note that any property value for a simple type is specified in the *@value* attr
 
 It's possible to express the item data in other language expressions with the format argument.
 
-##### Export item values to RDF/XML
+##### Export item values to RDF XML
 
 Show the item values in RDF/XML syntax.
 
@@ -605,8 +605,8 @@ The result of this request operation will be:
 
 ##### Export item values to *neo4j cypher* script
 
-If you want to import an item and its relations into a neo4j graph this option will be helpfully to do this.
-This format generate a list of commands in *cypher* language that be able to import in a neo4j project.
+If you want to import an item and its relationships into a neo4j graph, this option will be helpfully to do this.
+This format generates a list of commands in *cypher* language that can be imported in a neo4j project.
 
 > [GET] http://localhost/api/v1/item/1?format=neo4j
 
@@ -624,20 +624,20 @@ MERGE (person1)-[:KNOWS]->(person4)
 RETURN person1
 ```
 
-This result in a creation of two nodes *Person* with the given attributes and the relation *KNOWS* between them:
+This result in a creation of two nodes *Person* with the given attributes and the relationship *KNOWS* between them:
 
 ![A nodes relation graph in neo4j](https://raw.githubusercontent.com/XIMDEX/structured-data/master/doc/images/nodes-neo4j.png)
 ### Items manipulation
 
-The values of an item can be create or update thrown the item management endpoint.
+The values of an item can be created or updated through the item management endpoint.
 
-Basically the petition will contain the unique item id in the update operation, or the unique schema id in creation process.
+Basically the request will include the unique item id in the update operation, or the unique schema id in creation process.
 
-The rest of the data needed is the values for the properties to create the content of the item.
+The rest of the required data is the values for the properties to create the content of the item.
 
 #### Item creation
 
-So, if you want to create a new item based on the *Corporation* schema with a minimal amount of data (corporate name and contact email), the request will be:
+So, if you want to create a new item based on the *Corporation* schema with a minimal amount of data (corporate name and contact email), the request will be the following:
 
 > [POST] http://localhost/api/v1/item
 ```json
@@ -650,13 +650,13 @@ So, if you want to create a new item based on the *Corporation* schema with a mi
 }
 ```
 
-Note that with each property we will provide the available type id for the supported by such property in the *Organization* schema, and values for this type always is an array, even is the element only can contain a simple value.
+Note that with each property we will provide the available type id for the one supported by such property in the *Organization* schema, and the values for this type are always returned as an array, even if the element can only contain a simple value.
 
-> Remember that you can obtain information about this types retrieving the entire schema properties specification. For example in this case:
+> Remember that you can obtain information about these types retrieving the entire schema properties specification. For example, in this case:
 >
 > [GET] http://localhost/api/v1/schema/411
 
-The success result of this operation will response the new created item:
+If successful, the result of this operation will return the new item created:
 
 ```json
 {
@@ -685,9 +685,9 @@ The success result of this operation will response the new created item:
 
 #### Item update
 
-Now, we have an item named 'Open Ximdex' of type *Corporation*. And we need to **update** the contact email and add some extra information, like two employees and the country address.
+Now, we have an item named 'Open Ximdex' of type *Corporation*. We need to **update** the contact email and add some extra information, like two employees and the country address.
 
-The above example shows how can do that:
+The example above shows how this can be done:
 
 > [PATCH] http://localhost/api/v1/item/9
 ```json
@@ -705,7 +705,7 @@ Remember that if you don't specify the previous value id, a new email will be ad
 > 
 > [GET] http://localhost/api/v1/item/9?show=uid
 
-So now we have a *Corporation* item with a relation with many *Person* items through the *employee* property:
+So now we have a *Corporation* item with a relationship with many *Person* items through the *employee* property:
 
 ```json
 {
@@ -731,7 +731,7 @@ So now we have a *Corporation* item with a relation with many *Person* items thr
 }
 ```
 
-If you want to delete a value from this item, for example the employee called David, we can use the delete argument to remove only this value:
+If you want to delete a value from this item, for example, the employee called David, we can use the delete argument to remove only this value:
 
 > [PATCH] http://localhost/api/v1/item/9
 ```json
@@ -740,11 +740,11 @@ If you want to delete a value from this item, for example the employee called Da
 }
 ```
 
-Many property values can be removed expressing a list of unique values id in this attribute, and can be sent with other properties.
+Many property values can be removed specifying a list of unique values id in this attribute, and they can be sent with other properties.
 
-A whole property values can be removed specifying the *delete* attribute instead of the unique id list. 
+An entire set of property values can be removed specifying the *delete* attribute instead of the unique id list. 
 
-For example, if we want to remove all the employees for our item previously created, we will use the argument *delete* in the corresponding item property:
+For example, if we want to remove all of the employees for our item previously created, we will use the argument *delete* in the corresponding item property:
 
 > [PATCH] http://localhost/api/v1/item/9
 ```json
@@ -761,7 +761,7 @@ Only the values type *Person* (2407) will be removed in the *employee* property.
 
 #### Item deletion
 
-All data for an item can be removed using its unique id. The possible related items don't will be deleted, but the relations with other items will disappear.
+All data for an item can be removed using its unique id. The possible related items will not be deleted, but the relationships with other items will disappear.
 
 Usage:
 
