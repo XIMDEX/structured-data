@@ -460,7 +460,7 @@ For example, we want to change the previous created type from *Date* to *Person*
 
 To do this it is necessary to provide the unique id for the *Person* schema (45) and specify the *Thing* for the type field:
 
-> [POST] http://locahost/api/v1/available-types/2407
+> [PATCH] http://locahost/api/v1/available-types/2407
 ```json
 {
     "type": "Thing",
