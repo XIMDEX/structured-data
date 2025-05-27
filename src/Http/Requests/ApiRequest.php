@@ -1,6 +1,6 @@
 <?php
 
-namespace Ximdex\StructuredData\Requests;
+namespace Ximdex\StructuredData\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;

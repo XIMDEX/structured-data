@@ -60,7 +60,7 @@ class PropertySchema extends Model
         $this->property->label = Str::snake($label);
     }
     
-    public function setCommentAttribute(?string $comment = null): void
+    public function setCommentAttribute(string $comment = null): void
     {
         if (! $this->property) {
             $this->property = new Property();
@@ -117,7 +117,7 @@ class PropertySchema extends Model
      * 
      * @param array $types
      */
-    public function assingTypes(?array $types = null): void
+    public function assingTypes(array $types = null): void
     {
         if (! $types) {
             return;

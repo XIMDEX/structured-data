@@ -1,6 +1,6 @@
 <?php
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;

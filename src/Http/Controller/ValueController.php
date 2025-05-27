@@ -1,8 +1,8 @@
 <?php   
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
-use Ximdex\StructuredData\Requests\ValueRequest;
+use Ximdex\StructuredData\Http\Requests\ValueRequest;
 use Ximdex\StructuredData\Models\Value;
 
 class ValueController extends Controller

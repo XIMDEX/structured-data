@@ -1,12 +1,12 @@
 <?php
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Ximdex\StructuredData\Models\Item;
 use Ximdex\StructuredData\Models\Value;
-use Ximdex\StructuredData\Requests\ItemRequest;
+use Ximdex\StructuredData\Http\Requests\ItemRequest;
 use GuzzleHttp\Client;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -18,15 +18,43 @@ class SchemasImporter extends Command
      *
      * @var array
      */
+    // const SIMPLE_SCHEMA_TYPES = [
+    //     'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
+    //     'http://schema.org/Date' => AvailableType::DATE_TYPE,
+    //     'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
+    //     'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
+    //     'http://schema.org/Text' => AvailableType::TEXT_TYPE,
+    //     'http://schema.org/Time' => AvailableType::TIME_TYPE,
+    //     'rdfs:Class' => AvailableType::THING_TYPE
+    // ];
+
+    // const SIMPLE_SCHEMA_TYPES = [
+    //     'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
+    //     'http://schema.org/Date' => AvailableType::DATE_TYPE,
+    //     'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
+    //     'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
+    //     'http://schema.org/Text' => AvailableType::TEXT_TYPE,
+    //     'http://schema.org/Time' => AvailableType::TIME_TYPE,
+    //     'http://schema.org/Integer' => AvailableType::NUMBER_TYPE,
+    //     'http://schema.org/Float' => AvailableType::NUMBER_TYPE,
+    //     'http://schema.org/URL' => AvailableType::TEXT_TYPE,
+    //     'rdfs:Class' => AvailableType::THING_TYPE
+    // ];
+
     const SIMPLE_SCHEMA_TYPES = [
-        'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
-        'http://schema.org/Date' => AvailableType::DATE_TYPE,
-        'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
-        'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
-        'http://schema.org/Text' => AvailableType::TEXT_TYPE,
-        'http://schema.org/Time' => AvailableType::TIME_TYPE,
-        'rdfs:Class' => AvailableType::THING_TYPE
+        'schema:Boolean' => AvailableType::BOOLEAN_TYPE,
+        'schema:Date' => AvailableType::DATE_TYPE,
+        'schema:DateTime' => AvailableType::DATETIME_TYPE,
+        'schema:Number' => AvailableType::NUMBER_TYPE,
+        'schema:Text' => AvailableType::TEXT_TYPE,
+        'schema:Time' => AvailableType::TIME_TYPE,
+        'schema:Integer' => AvailableType::NUMBER_TYPE,
+        'schema:Float' => AvailableType::NUMBER_TYPE,
+        'schema:URL' => AvailableType::TEXT_TYPE,
+        'rdfs:Class' => AvailableType::THING_TYPE,
+        'schema:thing' => AvailableType::THING_TYPE
     ];
+    
     
     /**
      * The name and signature of the console command
@@ -139,7 +167,96 @@ class SchemasImporter extends Command
         $this->info('Getting schemas information from URL content');
         return json_decode($content, true);
     }
+
+    /**
+     * Safely retrieve a property from a Schema.org JSON-LD element,
+     * supporting both legacy full URIs and compact/prefixed keys.
+     */
+    protected function getSchemaOrgKey(array $element, string $key) {
+        // Try full URI (legacy style)
+        $fullUri = "http://schema.org/$key";
+        if (isset($element[$fullUri])) {
+            return $element[$fullUri];
+        }
+
+        // Try compacted with prefix (modern JSON-LD style)
+        $prefixed = "schema:$key";
+        if (isset($element[$prefixed])) {
+            return $element[$prefixed];
+        }
+
+        // Rare fallback: plain key
+        if (isset($element[$key])) {
+            return $element[$key];
+        }
+
+        return null;
+    }
+
+
+    private function normalizeId($id): string {
+        if (is_array($id) && isset($id['@id'])) {
+            $id = $id['@id'];
+        }
     
+        if (!is_string($id)) {
+            return '';
+        }
+    
+        // Handle compact IRIs (e.g. "schema:Text")
+        if (str_starts_with($id, 'schema:')) {
+            return str_replace('schema:', 'http://schema.org/', $id);
+        }
+    
+        // If it's already a full URI, return it
+        if (str_starts_with($id, 'http://schema.org/')) {
+            return $id;
+        }
+    
+        // Fallback: treat as a local term, prefix it
+        return 'http://schema.org/' . ltrim($id, '#:/');
+    }
+    
+
+    // private function normalizeId($id): string{
+    //     // If it's an array with @id, extract it
+    //     if (is_array($id) && isset($id['@id'])) {
+    //         $id = $id['@id'];
+    //     }
+
+    //     // Make sure it's now a string
+    //     if (!is_string($id)) {
+    //         throw new \InvalidArgumentException("Invalid ID format for normalizeId: " . print_r($id, true));
+    //     }
+
+    //     // Convert 'schema:Text' to 'http://schema.org/Text'
+    //     if (str_starts_with($id, 'schema:')) {
+    //         return 'http://schema.org/' . substr($id, 7);
+    //     }
+
+    //     return $id;
+    // }
+
+    // private function normalizeId($id): string{
+    //     if (is_array($id) && isset($id['@id'])) {
+    //         $id = $id['@id'];
+    //     }
+
+    //     if (!is_string($id)) {
+    //         return '';
+    //     }
+
+    //     return str_replace('schema:', 'http://schema.org/', $id);
+    // }
+
+
+    // private function normalizeId(string $id): string {
+    //     if (str_starts_with($id, 'schema:')) {
+    //         return str_replace('schema:', 'http://schema.org/', $id);
+    //     }
+    //     return $id;
+    // }
+
     /**
      * Read an array with JSON retrieved data and return an array ready to use for this database importer
      * 
@@ -164,38 +281,224 @@ class SchemasImporter extends Command
             if (! array_key_exists('@type', $element)) {
                 continue;
             }
-            if ($element['@type'] == 'rdfs:Class') {
+            // if ($element['@type'] == 'rdfs:Class') {
+            $type = (array) ($element['@type'] ?? []);
+            if (in_array('rdfs:Class', $type)) {
                 
                 // Element is a schema type
                 $schema = $this->retrieveElementData($element);
                 if (isset($element['rdfs:subClassOf'])) {
                     $schema['inheritedOf'] = $this->retrieveElements($element['rdfs:subClassOf']);
                 }
+
+                if (!isset($element['@id'])) {
+                    $errors[] = 'Schema element missing @id: ' . json_encode($element);
+                    continue;
+                }
+                
+                // FIXED PROPERTIES-SCHEMAS 
+                $id = $this->normalizeId($element['@id']);
+                $this->schemas[$id] = $schema;                
+
                 $this->schemas[$element['@id']] = $schema;
+
             } elseif ($element['@type'] == 'rdf:Property') {
                 
                 // Element is a property type
                 $property = $this->retrieveElementData($element);
                 
-                // Schemas using this property
-                if (isset($element['http://schema.org/domainIncludes'])) {
-                    $property['schemas'] = $this->retrieveElements($element['http://schema.org/domainIncludes']);
+
+                // domainIncludes → $property['schemas']
+                $domainIncludes = $this->getSchemaOrgKey($element, 'domainIncludes');
+                if ($domainIncludes) {
+                    $property['schemas'] = $this->retrieveElements($domainIncludes);
+                } else {
+                    $errors[] = "Property {$property['label']} does not provide a schema (domainIncludes)";
+                }
+
+                // rangeIncludes → $property['types']
+                $rangeIncludes = $this->getSchemaOrgKey($element, 'rangeIncludes');
+                if ($rangeIncludes) {
+                    $property['types'] = $this->retrieveElements($rangeIncludes);
+                } else {
+                    $errors[] = "Property {$property['label']} does not provide a type (rangeIncludes)";
+                }
+
+                // supersededBy → $property['supersededBy']
+                $supersededBy = $this->getSchemaOrgKey($element, 'supersededBy');
+                if ($supersededBy) {
+                    $superseded = $this->retrieveElements($supersededBy);
+                    if (!empty($superseded)) {
+                        $property['supersededBy'] = $superseded[0];
+                    }
+                }
+
+
+                foreach (($property['schemas'] ?? []) as $schemaRef) {
+                    if (is_array($schemaRef) && isset($schemaRef['@id'])) {
+                        $id = $this->normalizeId($schemaRef['@id']);
+                    } elseif (is_string($schemaRef)) {
+                        $id = $this->normalizeId($schemaRef);
+                    } else {
+                        $errors[] = "Invalid schemaRef structure for property {$property['label']}: " . json_encode($schemaRef);
+                        continue;
+                    }
+                
+                    if (!is_string($id)) {
+                        $errors[] = "Invalid schema ID (not a string) for {$property['label']}: " . json_encode($id);
+                        continue;
+                    }
+                
+                    if (!isset($this->schemas[$id])) {
+                        $errors[] = "Schema {$id} not found for {$property['label']} property";
+                    }
                 }
                 
-                // Type of values supported
-                if (isset($element['http://schema.org/rangeIncludes'])) {
-                    $property['types'] = $this->retrieveElements($element['http://schema.org/rangeIncludes']);
+
+                // foreach (($property['schemas'] ?? []) as $schemaRef) {
+                //     if (is_array($schemaRef) && isset($schemaRef['@id'])) {
+                //         $id = $this->normalizeId($schemaRef['@id']);
+                //     } elseif (is_string($schemaRef)) {
+                //         $id = $this->normalizeId($schemaRef);
+                //     } else {
+                //         $errors[] = "Invalid schemaRef structure for property {$property['label']}";
+                //         continue;
+                //     }
+                
+                //     if (!isset($this->schemas[$id])) {
+                //         $errors[] = "Schema {$id} not found for {$property['label']} property";
+                //     }
+                // }
+                
+
+                // // Validate schema references
+                // foreach (($property['schemas'] ?? []) as $schemaRef) {
+                //     $id = $this->normalizeId($schemaRef['@id']);
+                //     if (!isset($this->schemas[$id])) {
+                //         $errors[] = "Schema {$schemaRef['@id']} not found for {$property['label']} property";
+                //     }
+                // }
+
+
+
+                foreach (($property['types'] ?? []) as $typeRef) {
+                    if (is_array($typeRef) && isset($typeRef['@id'])) {
+                        $id = $this->normalizeId($typeRef['@id']);
+                    } elseif (is_string($typeRef)) {
+                        $id = $this->normalizeId($typeRef);
+                    } else {
+                        $errors[] = "Invalid typeRef structure for property {$property['label']}: " . json_encode($typeRef);
+                        continue;
+                    }
+                
+                    if (!is_string($id)) {
+                        $errors[] = "Invalid type ID (not a string) for {$property['label']}: " . json_encode($id);
+                        continue;
+                    }
+                
+                    if (
+                        !isset($this->schemas[$id]) &&
+                        !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
+                    ) {
+                        $errors[] = "Schema type {$id} not found for {$property['label']} property";
+                    }
                 }
                 
-                // Property is superseded by another one
-                if (isset($element['http://schema.org/supersededBy'])) {
-                    $supersededBy = $this->retrieveElements($element['http://schema.org/supersededBy']);
-                    $property['supersededBy'] = $supersededBy[0];
-                }
+
+                // foreach (($property['types'] ?? []) as $typeRef) {
+                //     if (is_array($typeRef) && isset($typeRef['@id'])) {
+                //         $id = $this->normalizeId($typeRef['@id']);
+                //     } elseif (is_string($typeRef)) {
+                //         $id = $this->normalizeId($typeRef);
+                //     } else {
+                //         $errors[] = "Invalid typeRef structure for property {$property['label']}";
+                //         continue;
+                //     }
+                
+                //     if (!is_string($id)) {
+                //         $errors[] = "Invalid type ID (not a string) for {$property['label']}: " . json_encode($id);
+                //         continue;
+                //     }
+                
+                //     if (
+                //         !isset($this->schemas[$id]) &&
+                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
+                //     ) {
+                //         $errors[] = "Schema type {$id} not found for {$property['label']} property";
+                //     }
+                // }
+                
+
+
+                // // Validate type references
+                // foreach (($property['types'] ?? []) as $typeRef) {
+                //     if (is_array($typeRef) && isset($typeRef['@id'])) {
+                //         $id = $this->normalizeId($typeRef['@id']);
+                //     } elseif (is_string($typeRef)) {
+                //         $id = $this->normalizeId($typeRef);
+                //     } else {
+                //         $errors[] = "Invalid typeRef structure for property {$property['label']}";
+                //         continue;
+                //     }
+                
+                //     if (
+                //         !isset($this->schemas[$id]) &&
+                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
+                //     ) {
+                //         $errors[] = "Schema type {$id} not found for {$property['label']} property";
+                //     }
+                // }
+                
+
+
+                // // Validate type references
+                // foreach (($property['types'] ?? []) as $typeRef) {
+                //     $id = $this->normalizeId($typeRef['@id']);
+                //     if (
+                //         !isset($this->schemas[$id]) &&
+                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
+                //     ) {
+                //         $errors[] = "Schema type {$typeRef['@id']} not found for {$property['label']} property";
+                //     }
+                // }
+
+
+                ///////////////////////////////////////////////
+
+                // // domainIncludes → $property['schemas']
+                // $domainIncludes = $this->getSchemaOrgKey($element, 'domainIncludes');
+                // if ($domainIncludes) {
+                //     $property['schemas'] = $this->retrieveElements($domainIncludes);
+                // } else {
+                //     $errors[] = "Property {$property['label']} does not provide a schema (domainIncludes)";
+                // }
+
+                // // rangeIncludes → $property['types']
+                // $rangeIncludes = $this->getSchemaOrgKey($element, 'rangeIncludes');
+                // if ($rangeIncludes) {
+                //     $property['types'] = $this->retrieveElements($rangeIncludes);
+                // } else {
+                //     $errors[] = "Property {$property['label']} does not provide a type (rangeIncludes)";
+                // }
+
+                // // supersededBy → $property['supersededBy']
+                // $supersededBy = $this->getSchemaOrgKey($element, 'supersededBy');
+                // if ($supersededBy) {
+                //     $superseded = $this->retrieveElements($supersededBy);
+                //     if (!empty($superseded)) {
+                //         $property['supersededBy'] = $superseded[0];
+                //     }
+                // }
+
                 $this->properties[$element['@id']] = $property;
             }
         }
     }
+
+    
+
+
+
     
     /**
      * Return an array with common element information
@@ -205,9 +508,28 @@ class SchemasImporter extends Command
      */
     private function retrieveElementData(array $element): array
     {
+        // return [
+        //     'label' => trim(isset($element['rdfs:label']['@value']) ? $element['rdfs:label']['@value'] : $element['rdfs:label']),
+        //     'comment' => trim(strip_tags($element['rdfs:comment']))
+        // ];
+        $label = isset($element['rdfs:label']['@value'])
+        ? $element['rdfs:label']['@value']
+        : (is_array($element['rdfs:label']) ? json_encode($element['rdfs:label']) : $element['rdfs:label']);
+
+        $comment = '';
+        if (isset($element['rdfs:comment'])) {
+            if (is_array($element['rdfs:comment']) && isset($element['rdfs:comment']['@value'])) {
+                $comment = $element['rdfs:comment']['@value'];
+            } elseif (is_string($element['rdfs:comment'])) {
+                $comment = $element['rdfs:comment'];
+            } elseif (is_array($element['rdfs:comment']) && is_array($element['rdfs:comment'][0]) && isset($element['rdfs:comment'][0]['@value'])) {
+                $comment = $element['rdfs:comment'][0]['@value'];
+            }
+        }
+
         return [
-            'label' => trim(isset($element['rdfs:label']['@value']) ? $element['rdfs:label']['@value'] : $element['rdfs:label']),
-            'comment' => trim(strip_tags($element['rdfs:comment']))
+            'label' => trim($label),
+            'comment' => trim(strip_tags($comment)),
         ];
     }
     
@@ -218,9 +540,51 @@ class SchemasImporter extends Command
      * @param string $key
      * @return array
      */
-    private function retrieveElements(array $elements, string $key = '@id'): array
-    {
+    // private function retrieveElements(array $elements, string $key = '@id'): array
+    // {
+    //     $result = [];
+    //     if (array_key_exists($key, $elements)) {
+    //         $result[] = $elements[$key];
+    //     } else {
+    //         foreach ($elements as $element) {
+    //             if (is_array($element)) {
+    //                 $result = array_merge($result, $this->retrieveElements($element, $key));
+    //             }
+    //         }
+    //     }
+    //     return $result;
+    // }
+
+    // private function retrieveElements($input, string $key = '@id'): array{
+    //     $result = [];
+    //     if (!is_array($input)) {
+    //         return [];
+    //     }
+    //     // Case: single element like {"@id": "schema:Text"}
+    //     if (isset($input[$key]) && is_string($input[$key])) {
+    //         $result[] = [ $key => $input[$key] ];
+    //         return $result;
+    //     }
+    //     // Case: multiple elements
+    //     foreach ($input as $item) {
+    //         if (is_array($item) && isset($item[$key]) && is_string($item[$key])) {
+    //             $result[] = [ $key => $item[$key] ];
+    //         } elseif (is_string($item)) {
+    //             // Fallback case: it's a string, so wrap it
+    //             $result[] = [ $key => $item ];
+    //         }
+    //     }
+    //     return $result;
+    // }
+
+
+    private function retrieveElements($elements, string $key = '@id'): array{
         $result = [];
+
+        if (!is_array($elements)) {
+            return $result;
+        }
+
         if (array_key_exists($key, $elements)) {
             $result[] = $elements[$key];
         } else {
@@ -230,8 +594,12 @@ class SchemasImporter extends Command
                 }
             }
         }
+
         return $result;
     }
+
+
+
     
     /**
      * Create or update database schemas from previous loaded content
@@ -279,20 +647,39 @@ class SchemasImporter extends Command
                 continue;
             }
             $parentSchemas = [];
-            foreach ($schema['inheritedOf'] as $schemaId) {
+            foreach ($schema['inheritedOf'] as $schemaEntry) {
+                $schemaId = is_array($schemaEntry) && isset($schemaEntry['@id']) 
+                    ? $this->normalizeId($schemaEntry['@id']) 
+                    : $this->normalizeId($schemaEntry);
+            
                 if (array_key_exists($schemaId, self::SIMPLE_SCHEMA_TYPES)) {
-                    
-                    // Avoid possible relations to simple types
-                    continue;
+                    continue; // Skip simple types
                 }
-                if (! array_key_exists($schemaId, $this->schemas)) {
+            
+                if (!array_key_exists($schemaId, $this->schemas)) {
                     $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['label']} schema";
                     continue;
                 }
+            
                 $parentSchemas[$this->schemas[$schemaId]['id']] = [
                     'version_id' => $this->version->id
                 ];
-            }
+            } 
+
+            // foreach ($schema['inheritedOf'] as $schemaId) {
+            //     if (array_key_exists($schemaId, self::SIMPLE_SCHEMA_TYPES)) {
+                    
+            //         // Avoid possible relations to simple types
+            //         continue;
+            //     }
+            //     if (! array_key_exists($schemaId, $this->schemas)) {
+            //         $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['label']} schema";
+            //         continue;
+            //     }
+            //     $parentSchemas[$this->schemas[$schemaId]['id']] = [
+            //         'version_id' => $this->version->id
+            //     ];
+            // }
             Schema::findOrFail($schema['id'])->schemas()->syncWithoutDetaching($parentSchemas);
             $bar->advance();
         }
@@ -325,7 +712,7 @@ class SchemasImporter extends Command
             // If this property is superseded by another one
             if (array_key_exists('supersededBy', $property)) {
                 
-                // Check if deprecated property does not exists in database to continue to avoid its updation
+                // Check if deprecated property does not exist in database to continue to avoid its update
                 $propertyModel = Property::where('label', $property['label'])->first();
                 if (! $propertyModel) {
                     
@@ -382,7 +769,10 @@ class SchemasImporter extends Command
             
             // For any schema create the available type information from possible values supported in this property
             foreach ($property['types'] as $type) {
-                
+                ///// DEBUG
+                // $this->warn($type);
+                ///// DEBUG
+
                 // Load the schema or simple type
                 if (array_key_exists($type, self::SIMPLE_SCHEMA_TYPES)) {
                     

@@ -2,12 +2,10 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-// use Illuminate\Contracts\Validation\Rule;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Rule;
 use Ximdex\StructuredData\Models\AvailableType;
 
-abstract class InAvailableTypeRule implements ValidationRule
+abstract class InAvailableTypeRule implements Rule
 {
     protected $availableType;
     
@@ -15,7 +13,7 @@ abstract class InAvailableTypeRule implements ValidationRule
     
     protected $supportMultiValidation = false;
     
-    public function __construct(?int $availableTypeId = null)
+    public function __construct(int $availableTypeId = null)
     {
         if ($availableTypeId) {
             $this->availableType = AvailableType::findOrFail($availableTypeId);
@@ -30,55 +28,33 @@ abstract class InAvailableTypeRule implements ValidationRule
      * {@inheritDoc}
      * @see \Illuminate\Contracts\Validation\Rule::passes()
      */
-    // public function passes($attribute, $value)
-    // {
-    //     if (isset($value['type']) and isset($value['values'])) {
-    //         if (! $this->availableType or $this->availableType->id != $value['type']) {
-    //             $this->availableType = AvailableType::find($value['type']);
-    //             if (! $this->availableType) {
-    //                 return false;
-    //             }
-    //         }
-    //         $this->value = $value['values'];
-    //     } elseif (! $this->availableType) {
-    //         return false;
-    //     } else {
-    //         $this->value = $value;
-    //     }
-    //     if (! is_array($this->value)) {
-    //         $this->value = [$value];
-    //     }
-    //     return true;
-    // }
-    
-    /**
-     * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::message()
-     */
-    // public function message()
-    // {
-    //     return "The :attribute must be a valid type for property";
-    // }
-
-    /**
-     * Fix deprecated \Illuminate\Contracts\Validation\Rule
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void{
+    public function passes($attribute, $value)
+    {
         if (isset($value['type']) and isset($value['values'])) {
             if (! $this->availableType or $this->availableType->id != $value['type']) {
                 $this->availableType = AvailableType::find($value['type']);
                 if (! $this->availableType) {
-                    $fail('The :attribute must be a valid type for property');
+                    return false;
                 }
             }
             $this->value = $value['values'];
         } elseif (! $this->availableType) {
-            $fail('The :attribute must be a valid type for property');
+            return false;
         } else {
             $this->value = $value;
         }
         if (! is_array($this->value)) {
             $this->value = [$value];
         }
+        return true;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Illuminate\Contracts\Validation\Rule::message()
+     */
+    public function message()
+    {
+        return "The :attribute must be a valid type for property";
     }
 }

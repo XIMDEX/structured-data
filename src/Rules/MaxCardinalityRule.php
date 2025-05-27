@@ -2,9 +2,6 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Closure;
-use Illuminate\Support\Facades\Validator;
-
 class MaxCardinalityRule extends InAvailableTypeRule
 {
     /**
@@ -13,44 +10,28 @@ class MaxCardinalityRule extends InAvailableTypeRule
      * {@inheritDoc}
      * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::passes()
      */
-    // public function passes($attribute, $value)
-    // {
-    //     if (parent::passes($attribute, $value) === false) {
-    //         return false;
-    //     }
-    //     $value = $this->value;
-    //     $maxCardinality = $this->availableType->propertySchema->max_cardinality;
-    //     if ($maxCardinality > 0 && count($this->value) > $maxCardinality) {
-    //         return false;
-    //     }
-    //     return true;
-    // }
+    public function passes($attribute, $value)
+    {
+        if (parent::passes($attribute, $value) === false) {
+            return false;
+        }
+        $value = $this->value;
+        $maxCardinality = $this->availableType->propertySchema->max_cardinality;
+        if ($maxCardinality > 0 && count($this->value) > $maxCardinality) {
+            return false;
+        }
+        return true;
+    }
     
     /**
      * {@inheritDoc}
      * @see \Ximdex\StructuredData\Rules\InAvailableTypeRule::message()
      */
-    // public function message()
-    // {
-    //     if (! $this->availableType) {
-    //         return parent::message();
-    //     }
-    //     return "The number of values for :attribute cannot be greater than {$this->availableType->propertySchema->max_cardinality}";
-    // }
-
-    public function validate(string $attribute, mixed $value, Closure $fail): void{
-        $data = ['attribute' => $value];
-        $validator = Validator::make($data, [
-            'attribute' => [new InAvailableTypeRule]
-        ]);
-
-        if ($validator->fails()) {
-            $fail('The number of values for :attribute cannot be greater than {$this->availableType->propertySchema->max_cardinality}');
+    public function message()
+    {
+        if (! $this->availableType) {
+            return parent::message();
         }
-        $value = $this->value;
-        $maxCardinality = $this->availableType->propertySchema->max_cardinality;
-        if ($maxCardinality > 0 && count($this->value) > $maxCardinality) {
-            $fail('The number of values for :attribute cannot be greater than {$this->availableType->propertySchema->max_cardinality}');
-        }
+        return "The number of values for :attribute cannot be greater than {$this->availableType->propertySchema->max_cardinality}";
     }
 }

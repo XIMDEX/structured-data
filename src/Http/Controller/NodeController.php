@@ -1,6 +1,6 @@
 <?php
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
 use Ximdex\StructuredData\Models\Node;
 
