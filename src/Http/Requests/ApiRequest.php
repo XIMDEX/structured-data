@@ -16,7 +16,7 @@ class ApiRequest extends FormRequest
         ]
     ];
     
-    protected $method;
+    public ?string $method;
     
     /**
      * Determine if the user is authorized to make this request

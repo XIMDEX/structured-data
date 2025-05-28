@@ -2,53 +2,91 @@
 
 namespace Ximdex\StructuredData\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+// use Illuminate\Contracts\Validation\Rule;
 use Ximdex\StructuredData\Models\Property;
 use Ximdex\StructuredData\Models\Schema;
 
-class ValidPropertyRule implements Rule
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+
+class ValidPropertyRule implements ValidationRule
 {
     private $schema;
-    
-    private $property;
-    
-    public function __construct(int $schema = null)
+    private ?string $property = null;
+
+    public function __construct(?int $schema = null)
     {
         $this->schema = Schema::findOrFail($schema);
     }
-    
-    /**
-     * If the given property is not in use in the schema, do not passes the rule
-     * 
-     * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::passes()
-     */
-    public function passes($attribute, $value)
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $data = explode('.', $attribute);
-        if (! isset($data[1])) {
-            return false;
+        if (!isset($data[1])) {
+            $fail("Property is missing in attribute format.");
+            return;
         }
+
         $this->property = $data[1];
+
         $prop = Property::where('label', $this->property)->first();
         if (! $prop) {
-            return false;
+            $fail("Property {$this->property} is not valid for given schema @{$this->schema->label}.");
+            return;
         }
+
         $res = $this->schema->properties()->where('property_id', $prop->id);
         if (! $res->count()) {
-            
             // The property does not appear in the schema or inherited schemas
-            return false;
+            $fail("Property {$this->property} is not valid for given schema @{$this->schema->label}.");
+            return;
         }
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see \Illuminate\Contracts\Validation\Rule::message()
-     */
-    public function message()
-    {
-        return "Property {$this->property} is nod valid for given schema @{$this->schema->label}";
     }
 }
+
+// class ValidPropertyRule implements Rule
+// {
+//     private $schema;
+    
+//     private $property;
+    
+//     public function __construct(?int $schema = null)
+//     {
+//         $this->schema = Schema::findOrFail($schema);
+//     }
+    
+//     /**
+//      * If the given property is not in use in the schema, do not passes the rule
+//      * 
+//      * {@inheritDoc}
+//      * @see \Illuminate\Contracts\Validation\Rule::passes()
+//      */
+//     public function passes($attribute, $value)
+//     {
+//         $data = explode('.', $attribute);
+//         if (! isset($data[1])) {
+//             return false;
+//         }
+//         $this->property = $data[1];
+//         $prop = Property::where('label', $this->property)->first();
+//         if (! $prop) {
+//             return false;
+//         }
+//         $res = $this->schema->properties()->where('property_id', $prop->id);
+//         if (! $res->count()) {
+            
+//             // The property does not appear in the schema or inherited schemas
+//             return false;
+//         }
+//         return true;
+//     }
+
+//     /**
+//      * {@inheritDoc}
+//      * @see \Illuminate\Contracts\Validation\Rule::message()
+//      */
+//     public function message()
+//     {
+//         return "Property {$this->property} is nod valid for given schema @{$this->schema->label}";
+//     }
+// }
