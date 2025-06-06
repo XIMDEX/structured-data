@@ -80,9 +80,10 @@ php artisan schemas:import https://schema.org/version/latest/schemaorg-current-h
 <!--If the given URL does not contain the schema definitions version you can provide by another argument:-->
 
 Currently, Schema.org just serves the lastest version, but for legacy purposes you can specify the version as another argument:
+<!-- php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 3.3 -->
 
 ```shell
-php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 29.2
+php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld 29.2
 ```
 
 If no argument is provided, the version will be labeled as the latest one.
