@@ -77,11 +77,15 @@ php artisan schemas:import https://schema.org/version/latest/schemaorg-current-h
 
 > Actually this command only support schemas.org definitions in JSON+LD format.
 
-If the given URL does not contain the schema definitions version you can provide by another argument:
+<!--If the given URL does not contain the schema definitions version you can provide by another argument:-->
+
+Currently, Schema.org just serves the lastest version, but for legacy purposes you can specify the version as another argument:
 
 ```shell
-php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 3.3
+php artisan schemas:import http://schema.org/version/3.3/schema.jsonld 29.2
 ```
+
+If no argument is provided, the version will be labeled as the latest one.
 
 > If there is any schema definition created by a previous importation or by any user, this information will be updated to the new version and only the absent definitions will be marked as obsolete.
 > However we can still use this deprecated information later.
