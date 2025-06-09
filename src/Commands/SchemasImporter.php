@@ -18,29 +18,6 @@ class SchemasImporter extends Command
      *
      * @var array
      */
-    // const SIMPLE_SCHEMA_TYPES = [
-    //     'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
-    //     'http://schema.org/Date' => AvailableType::DATE_TYPE,
-    //     'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
-    //     'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
-    //     'http://schema.org/Text' => AvailableType::TEXT_TYPE,
-    //     'http://schema.org/Time' => AvailableType::TIME_TYPE,
-    //     'rdfs:Class' => AvailableType::THING_TYPE
-    // ];
-
-    // const SIMPLE_SCHEMA_TYPES = [
-    //     'http://schema.org/Boolean' => AvailableType::BOOLEAN_TYPE,
-    //     'http://schema.org/Date' => AvailableType::DATE_TYPE,
-    //     'http://schema.org/DateTime' => AvailableType::DATETIME_TYPE,
-    //     'http://schema.org/Number' => AvailableType::NUMBER_TYPE,
-    //     'http://schema.org/Text' => AvailableType::TEXT_TYPE,
-    //     'http://schema.org/Time' => AvailableType::TIME_TYPE,
-    //     'http://schema.org/Integer' => AvailableType::NUMBER_TYPE,
-    //     'http://schema.org/Float' => AvailableType::NUMBER_TYPE,
-    //     'http://schema.org/URL' => AvailableType::TEXT_TYPE,
-    //     'rdfs:Class' => AvailableType::THING_TYPE
-    // ];
-
     const SIMPLE_SCHEMA_TYPES = [
         'schema:Boolean' => AvailableType::BOOLEAN_TYPE,
         'schema:Date' => AvailableType::DATE_TYPE,
@@ -202,6 +179,11 @@ class SchemasImporter extends Command
         if (!is_string($id)) {
             return '';
         }
+
+        // Fix DataType not being a simple type
+        if($id == 'rdfs:Class'){
+            return $id;
+        }
     
         // Handle compact IRIs (e.g. "schema:Text")
         if (str_starts_with($id, 'schema:')) {
@@ -216,46 +198,6 @@ class SchemasImporter extends Command
         // Fallback: treat as a local term, prefix it
         return 'http://schema.org/' . ltrim($id, '#:/');
     }
-    
-
-    // private function normalizeId($id): string{
-    //     // If it's an array with @id, extract it
-    //     if (is_array($id) && isset($id['@id'])) {
-    //         $id = $id['@id'];
-    //     }
-
-    //     // Make sure it's now a string
-    //     if (!is_string($id)) {
-    //         throw new \InvalidArgumentException("Invalid ID format for normalizeId: " . print_r($id, true));
-    //     }
-
-    //     // Convert 'schema:Text' to 'http://schema.org/Text'
-    //     if (str_starts_with($id, 'schema:')) {
-    //         return 'http://schema.org/' . substr($id, 7);
-    //     }
-
-    //     return $id;
-    // }
-
-    // private function normalizeId($id): string{
-    //     if (is_array($id) && isset($id['@id'])) {
-    //         $id = $id['@id'];
-    //     }
-
-    //     if (!is_string($id)) {
-    //         return '';
-    //     }
-
-    //     return str_replace('schema:', 'http://schema.org/', $id);
-    // }
-
-
-    // private function normalizeId(string $id): string {
-    //     if (str_starts_with($id, 'schema:')) {
-    //         return str_replace('schema:', 'http://schema.org/', $id);
-    //     }
-    //     return $id;
-    // }
 
     /**
      * Read an array with JSON retrieved data and return an array ready to use for this database importer
@@ -274,7 +216,11 @@ class SchemasImporter extends Command
             if (array_key_exists('@id', $data)) {
                 $this->version->tag = $data['@id'];
             } else {
-                throw new \Exception('Cannot load a version tag from source data given (@id)');
+                // throw new \Exception('Cannot load a version tag from source data given (@id)');
+                
+                // Version is not supported anymore but still used in the api
+                // This allows the user to not to have to specify any given version tag
+                $this->version->tag = 'Latest';
             }
         }
         foreach ($data['@graph'] as $element) {
@@ -353,33 +299,6 @@ class SchemasImporter extends Command
                         $errors[] = "Schema {$id} not found for {$property['label']} property";
                     }
                 }
-                
-
-                // foreach (($property['schemas'] ?? []) as $schemaRef) {
-                //     if (is_array($schemaRef) && isset($schemaRef['@id'])) {
-                //         $id = $this->normalizeId($schemaRef['@id']);
-                //     } elseif (is_string($schemaRef)) {
-                //         $id = $this->normalizeId($schemaRef);
-                //     } else {
-                //         $errors[] = "Invalid schemaRef structure for property {$property['label']}";
-                //         continue;
-                //     }
-                
-                //     if (!isset($this->schemas[$id])) {
-                //         $errors[] = "Schema {$id} not found for {$property['label']} property";
-                //     }
-                // }
-                
-
-                // // Validate schema references
-                // foreach (($property['schemas'] ?? []) as $schemaRef) {
-                //     $id = $this->normalizeId($schemaRef['@id']);
-                //     if (!isset($this->schemas[$id])) {
-                //         $errors[] = "Schema {$schemaRef['@id']} not found for {$property['label']} property";
-                //     }
-                // }
-
-
 
                 foreach (($property['types'] ?? []) as $typeRef) {
                     if (is_array($typeRef) && isset($typeRef['@id'])) {
@@ -403,101 +322,11 @@ class SchemasImporter extends Command
                         $errors[] = "Schema type {$id} not found for {$property['label']} property";
                     }
                 }
-                
-
-                // foreach (($property['types'] ?? []) as $typeRef) {
-                //     if (is_array($typeRef) && isset($typeRef['@id'])) {
-                //         $id = $this->normalizeId($typeRef['@id']);
-                //     } elseif (is_string($typeRef)) {
-                //         $id = $this->normalizeId($typeRef);
-                //     } else {
-                //         $errors[] = "Invalid typeRef structure for property {$property['label']}";
-                //         continue;
-                //     }
-                
-                //     if (!is_string($id)) {
-                //         $errors[] = "Invalid type ID (not a string) for {$property['label']}: " . json_encode($id);
-                //         continue;
-                //     }
-                
-                //     if (
-                //         !isset($this->schemas[$id]) &&
-                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
-                //     ) {
-                //         $errors[] = "Schema type {$id} not found for {$property['label']} property";
-                //     }
-                // }
-                
-
-
-                // // Validate type references
-                // foreach (($property['types'] ?? []) as $typeRef) {
-                //     if (is_array($typeRef) && isset($typeRef['@id'])) {
-                //         $id = $this->normalizeId($typeRef['@id']);
-                //     } elseif (is_string($typeRef)) {
-                //         $id = $this->normalizeId($typeRef);
-                //     } else {
-                //         $errors[] = "Invalid typeRef structure for property {$property['label']}";
-                //         continue;
-                //     }
-                
-                //     if (
-                //         !isset($this->schemas[$id]) &&
-                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
-                //     ) {
-                //         $errors[] = "Schema type {$id} not found for {$property['label']} property";
-                //     }
-                // }
-                
-
-
-                // // Validate type references
-                // foreach (($property['types'] ?? []) as $typeRef) {
-                //     $id = $this->normalizeId($typeRef['@id']);
-                //     if (
-                //         !isset($this->schemas[$id]) &&
-                //         !array_key_exists($id, self::SIMPLE_SCHEMA_TYPES)
-                //     ) {
-                //         $errors[] = "Schema type {$typeRef['@id']} not found for {$property['label']} property";
-                //     }
-                // }
-
-
-                ///////////////////////////////////////////////
-
-                // // domainIncludes → $property['schemas']
-                // $domainIncludes = $this->getSchemaOrgKey($element, 'domainIncludes');
-                // if ($domainIncludes) {
-                //     $property['schemas'] = $this->retrieveElements($domainIncludes);
-                // } else {
-                //     $errors[] = "Property {$property['label']} does not provide a schema (domainIncludes)";
-                // }
-
-                // // rangeIncludes → $property['types']
-                // $rangeIncludes = $this->getSchemaOrgKey($element, 'rangeIncludes');
-                // if ($rangeIncludes) {
-                //     $property['types'] = $this->retrieveElements($rangeIncludes);
-                // } else {
-                //     $errors[] = "Property {$property['label']} does not provide a type (rangeIncludes)";
-                // }
-
-                // // supersededBy → $property['supersededBy']
-                // $supersededBy = $this->getSchemaOrgKey($element, 'supersededBy');
-                // if ($supersededBy) {
-                //     $superseded = $this->retrieveElements($supersededBy);
-                //     if (!empty($superseded)) {
-                //         $property['supersededBy'] = $superseded[0];
-                //     }
-                // }
 
                 $this->properties[$element['@id']] = $property;
             }
         }
     }
-
-    
-
-
 
     
     /**
@@ -540,44 +369,6 @@ class SchemasImporter extends Command
      * @param string $key
      * @return array
      */
-    // private function retrieveElements(array $elements, string $key = '@id'): array
-    // {
-    //     $result = [];
-    //     if (array_key_exists($key, $elements)) {
-    //         $result[] = $elements[$key];
-    //     } else {
-    //         foreach ($elements as $element) {
-    //             if (is_array($element)) {
-    //                 $result = array_merge($result, $this->retrieveElements($element, $key));
-    //             }
-    //         }
-    //     }
-    //     return $result;
-    // }
-
-    // private function retrieveElements($input, string $key = '@id'): array{
-    //     $result = [];
-    //     if (!is_array($input)) {
-    //         return [];
-    //     }
-    //     // Case: single element like {"@id": "schema:Text"}
-    //     if (isset($input[$key]) && is_string($input[$key])) {
-    //         $result[] = [ $key => $input[$key] ];
-    //         return $result;
-    //     }
-    //     // Case: multiple elements
-    //     foreach ($input as $item) {
-    //         if (is_array($item) && isset($item[$key]) && is_string($item[$key])) {
-    //             $result[] = [ $key => $item[$key] ];
-    //         } elseif (is_string($item)) {
-    //             // Fallback case: it's a string, so wrap it
-    //             $result[] = [ $key => $item ];
-    //         }
-    //     }
-    //     return $result;
-    // }
-
-
     private function retrieveElements($elements, string $key = '@id'): array{
         $result = [];
 
@@ -666,20 +457,6 @@ class SchemasImporter extends Command
                 ];
             } 
 
-            // foreach ($schema['inheritedOf'] as $schemaId) {
-            //     if (array_key_exists($schemaId, self::SIMPLE_SCHEMA_TYPES)) {
-                    
-            //         // Avoid possible relations to simple types
-            //         continue;
-            //     }
-            //     if (! array_key_exists($schemaId, $this->schemas)) {
-            //         $errors[] = "There is not a schema {$schemaId} to make the relation with {$schema['label']} schema";
-            //         continue;
-            //     }
-            //     $parentSchemas[$this->schemas[$schemaId]['id']] = [
-            //         'version_id' => $this->version->id
-            //     ];
-            // }
             Schema::findOrFail($schema['id'])->schemas()->syncWithoutDetaching($parentSchemas);
             $bar->advance();
         }
@@ -753,7 +530,16 @@ class SchemasImporter extends Command
             if (array_key_exists('schemas', $property)) {
                 foreach ($property['schemas'] as $schemaId) {
                     if (! array_key_exists($schemaId, $this->schemas)) {
-                        $errors[] = "Schema {$schemaId} not found for {$property['label']} property";
+                        
+                        // Hide deprecated schemas warning
+                        // Add new ones to the list when needed
+                        $deprecatedSchemas = [
+                            'schema:DeliveryTimeSettings'
+                        ];
+                        
+                        if (!in_array($schemaId,$deprecatedSchemas)) {
+                            $errors[] = "Schema {$schemaId} not found for {$property['label']} property";
+                        }
                         continue;
                     }
                     
