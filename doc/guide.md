@@ -45,6 +45,11 @@ composer require ximdex/structured-data
 ```
 
 This command installs the package in vendor extension.
+
+Before continuing, you have to configure the database properly in your Laravel project in your .evn file in the root directory. For example:
+
+![database](images/01-database.png)
+
 The next step is the database generation, so is needed to run the migration process for Laravel using the appropriate command for this purpose:
 
 ```shell
@@ -57,25 +62,29 @@ After this operation we have created the database tables in our project with the
 
 So at this time we are able to consume the API operations to manage the schemas and items data.
 
-We assume in this manual that the host for our Laravel instance is under a host named localhost. Then we call the endpoint with this example usage:
+We assume in this manual that the host for our Laravel instance is under a host named localhost and it's being served. Otherwise we would need to add the rest of the folder hierarchy. For example, for a Laravel project in a folder called <i>structured-data</i>:
+
+> http://localhost/structured-data/public/api/v1
+
+Assuming the former, then we call the endpoint with this example usage:
 
 > [GET] http://localhost/api/v1/schema
 
-This request will retrieve a JSON code with all the schemas that are actually created in our storage. 
+This request will retrieve a JSON code with all the schemas that are actually created in our storage. Since it's a brand new installation there wouldn't be any schema. This will be covered later.
 
 ## API endpoints specification
 
-Operations over schemas an items data give you a complete control to create or update schemas, generate items of a type of this schemas and associate information to its properties.
+Operations over schemas and items data give you a complete control to create or update schemas, generate items of a type of this schemas and associate information to its properties.
 
 ### Schemas importation
 
-For a brand new installation, there are no schemas to work with. To import a schema definitions URL provided by schema.org you can run this console command under the Laravel directory:
+To import a schema definitions URL provided by schema.org you can run this console command under the Laravel directory:
 
 ```shell
 php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld
 ```
 
-> Actually this command only support schemas.org definitions in JSON+LD format.
+> This command only support schemas.org definitions in JSON+LD format.
 
 <!--If the given URL does not contain the schema definitions version you can provide by another argument:-->
 
@@ -86,7 +95,7 @@ Currently, Schema.org just serves the lastest version, but for legacy purposes y
 php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld 29.2
 ```
 
-If no argument is provided, the version will be labeled as the latest one.
+If no argument is provided, the version will be labeled as 'Latest'.
 
 > If there is any schema definition created by a previous importation or by any user, this information will be updated to the new version and only the absent definitions will be marked as obsolete.
 > However we can still use this deprecated information later.
@@ -105,51 +114,59 @@ Each schema is a type of item that contains a variable number of properties and 
 
 You can use the schema unique id to load the schema attributes, its properties and the other schemas that are inherited. Usage:
 
-> [GET] http://localhost/api/v1/schema/45
+> [GET] http://localhost/api/v1/schema/132
 
-The result of this request will be a JSON object containing the definition of a schema identified by the number 45, in this example the *Person* schema:
+The result of this request will be a JSON object containing the definition of a schema identified by the number 132, in this example the *Person* schema:
 
 ```json
 {
-  "id": 45,
-  "label": "Person",
-  "comment": "A person (alive, dead, undead, or fictional).",
-  "version_id": 5,
-  "properties": [
-    {
-      "id": 16,
-      "min_cardinality": 0,
-      "max_cardinality": null,
-      "order": 1,
-      "default_value": null,
-      "version_id": 5,
-      "label": "memberOf",
-      "comment": "An Organization (or ProgramMembership) to which this Person or Organization belongs.",
-      "schema_label": "Person",
-      "version_tag": "3.7",
-      "types": [
+    "id": 132,
+    "label": "Person",
+    "comment": "A person (alive, dead, undead, or fictional).",
+    "version_id": 1,
+    "properties": [
         {
-          "id": 18,
-          "schema_id": 53,
-          "type": "Thing",
-          "version_id": 5,
-          "schema_label": "Organization",
-          "version_tag": "3.7"
-        },
-      ]
-    }
+            "id": 7,
+            "min_cardinality": 0,
+            "max_cardinality": null,
+            "order": 1,
+            "default_value": null,
+            "version_id": 1,
+            "label": "jobTitle",
+            "comment": "The job title of the person (for example, Financial Manager).",
+            "schema_label": "Person",
+            "version_tag": "Latest",
+            "types": [
+                {
+                    "id": 7,
+                    "schema_id": null,
+                    "type": "Text",
+                    "version_id": 1,
+                    "schema_label": null,
+                    "version_tag": "Latest"
+                },
+                {
+                    "id": 8,
+                    "schema_id": 286,
+                    "type": "Thing",
+                    "version_id": 1,
+                    "schema_label": "DefinedTerm",
+                    "version_tag": "Latest"
+                }
+            ]
+        }
     ],
-  "version_tag": "3.7",
-  "schemas": [
-    {
-      "id": 488,
-      "label": "Thing",
-      "comment": "The most generic type of item.",
-      "version_id": 5,
-      "version_tag": "3.7",
-      "schemas": []
-    }
-  ]
+    "version_tag": "Latest",
+    "schemas": [
+        {
+            "id": 140,
+            "label": "Thing",
+            "comment": "The most generic type of item.",
+            "version_id": 1,
+            "version_tag": "Latest",
+            "schemas": []
+        }
+    ]
 }
 ```
 
@@ -166,11 +183,11 @@ Example usage:
 > [POST] http://localhost/api/v1/schema
 ```json
 {
-    "label": "CafeOrCoffeeShop",
-    "comment": "A cafe or coffee shop",
+    "label": "ClubMember",
+    "comment": "A member of a club",
     "schemas": [
         {
-            "id": 48,
+            "id": 132,
             "priority": 1
         }
     ]
@@ -181,9 +198,9 @@ The result of this operation will be the created schema containing the new uniqu
 
 ```json
 {
-    "label": "CafeOrCoffeeShop",
-    "comment": "A cafe or coffee shop",
-    "id": 797,
+    "label": "ClubMember",
+    "comment": "A member of a club",
+    "id": 920,
     "version_tag": null
 }
 ```
@@ -203,15 +220,28 @@ This is an example of a response error that happens when you try to create a sch
 }
 ```
 
+Another common error happens when the label contains anything else but letters. The label can't contain spaces either, like for example "Club Member". The returned error looks like this:
+
+```json
+{
+    "message": "The label field must only contain letters.",
+    "errors": {
+        "label": [
+            "The label field must only contain letters."
+        ]
+    }
+}
+```
+
 This is the common format for any error in a management operation. Note that you can have multiple errors with different POST fields.
 
 #### Updating a schema
 Similar to the creation of a new schema, the only difference is the inclusion of the unique id of the schema to edit in the request operation, and the usage of either the PUT or PATCH method instead of POST.
 
-> [PATCH] http://localhost/api/v1/schema/1
+> [PATCH] http://localhost/api/v1/schema/920
 ```json
 {
-    "comment": "A cafe or coffee shop updated"
+    "comment": "A member of a club updated"
 }
 ```
 
@@ -232,25 +262,25 @@ In the example above, using PUT instead of PATCH, the response will be:
 Like in the creation operation, it's possible to send a list of schemas to change the properties schema inheritance. This argument is optional, but if it's used, the relationship with any schemas previously associated will be removed and replaced with the given ones.
 For example:
 
-> [PATCH] http://localhost/api/v1/schema/1
+> [PATCH] http://localhost/api/v1/schema/920
 ```json
 {
     "schemas": [
         {
-            "id": 45,
+            "id": 133,
             "priority": 1
         }
     ]
 }
 ```
 
-Now our schema with unique id 1 will extend the Person schema with priority 1.
+Now our schema with unique id 920 will extend the State schema with priority 1.
 
 #### Schema deletion
 
 A schema can be deleted using the DELETE method and the unique id of the schema to delete. This operation can't be undone.
 
-> [DELETE] http://localhost/api/v1/schema/1
+> [DELETE] http://localhost/api/v1/schema/920
 
 If the schema is already in use by any item, the operation will be denied.
 
@@ -310,7 +340,7 @@ Now we have created a type text and Person for this relationship:
         },
         {
             "type": "Thing",
-            "schema_id": 45,
+            "schema_id": 132,
             "id": 2404,
             "schema_label": "Person",
             "version_tag": null
@@ -397,7 +427,7 @@ Also you can provide a list of available types to change the supported values in
 {
     "types": [
         {"type": "Text"},
-        {"type": "Thing", "schema_id": 45}
+        {"type": "Thing", "schema_id": 132}
     ]
 }
 ```
@@ -463,13 +493,13 @@ To update the type attributes is necessary to include the unique type id.
 
 For example, we want to change the previous created type from *Date* to *Person* schema, in order to allow items of this type as this *employee* property.
 
-To do this it is necessary to provide the unique id for the *Person* schema (45) and specify the *Thing* for the type field:
+To do this it is necessary to provide the unique id for the *Person* schema (132) and specify the *Thing* for the type field:
 
 > [PATCH] http://locahost/api/v1/available-types/2407
 ```json
 {
     "type": "Thing",
-    "schema_id": 45
+    "schema_id": 132
 }
 ```
 
@@ -487,7 +517,7 @@ Now the updated type support items of type Person schema looks like this:
     "types": [
         {
             "id": 2407,
-            "schema_id": 45,
+            "schema_id": 132,
             "type": "Thing",
             "schema_label": "Person"
         },
@@ -554,7 +584,7 @@ This request retrieves the same information about the item values, adding the un
     "@id": "http://localhost/api/v1/item/1",
     "@item": 1,
     "@version": 5,
-    "@uid": 45,
+    "@uid": 132,
     "knowsLanguage": [
         {
             "@uid": 204,
@@ -642,43 +672,53 @@ The rest of the required data is the values for the properties to create the con
 
 #### Item creation
 
-So, if you want to create a new item based on the *Corporation* schema with a minimal amount of data (corporate name and contact email), the request will be the following:
+So, if you want to create a new item based on the *Person* schema with a minimal amount of data (name and email), the request will be the following:
 
 > [POST] http://localhost/api/v1/item
 ```json
 {
-    "schema_id": "411",
+    "schema_id": "132",
     "properties": {
-        "name": {"type": 350, "values": ["Open Ximdex"]},
-        "email": {"type": 983, "values": ["contact@ximdex.net"]}
+        "name": {
+            "type": 1415,
+            "values": [
+                "Open Ximdex"
+            ]
+        },
+        "email": {
+            "type": 369,
+            "values": [
+                "contact@ximdex.net"
+            ]
+        }
     }
 }
 ```
 
-Note that with each property we will provide the available type id for the one supported by such property in the *Organization* schema, and the values for this type are always returned as an array, even if the element can only contain a simple value.
+Note that with each property we will provide the available type id for the one supported by such property in the *Person* schema, and the values for this type are always returned as an array, even if the element can only contain a simple value.
 
 > Remember that you can obtain information about these types retrieving the entire schema properties specification. For example, in this case:
 >
-> [GET] http://localhost/api/v1/schema/411
+> [GET] http://localhost/api/v1/schema/132
 
 If successful, the result of this operation will return the new item created:
 
 ```json
 {
-    "schema_id": "411",
+    "schema_id": "132",
     "id": 9,
     "schema_url": "http://localhost/api/v1/item/9",
     "schema_label": "Corporation",
     "values": [
         {
-            "available_type_id": 350,
+            "available_type_id": 1415,
             "value": "Open Ximdex",
             "ref_item_id": null,
             "position": 1,
             "id": 211
         },
         {
-            "available_type_id": 983,
+            "available_type_id": 369,
             "value": "info@ximdex.com",
             "ref_item_id": null,
             "position": 1,
@@ -698,7 +738,7 @@ The example above shows how this can be done:
 ```json
 {
     "properties": {
-        "email": {"type": 983, "values": [{"id": 212, "value": "new-contact-email@ximdex.net"}]},
+        "email": {"type": 369, "values": [{"id": 212, "value": "new-contact-email@ximdex.net"}]},
         "employee": {"type": 2407, "values": [2, 4]}
     }
 }
@@ -778,3 +818,4 @@ Do this carefully, this operation cannot be undone.
 
 * Antonio Jesús Lucena [@ajlucena78](https://github.com/ajlucena78).
 * David Arroyo [@davarresc](https://github.com/davarresc).
+* Daniel Domínguez [@daniel423615](https://github.com/daniel423615).
