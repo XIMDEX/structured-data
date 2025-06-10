@@ -1,9 +1,9 @@
 <?php
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
 use Ximdex\StructuredData\Models\Schema;
-use Ximdex\StructuredData\Requests\SchemaRequest;
+use Ximdex\StructuredData\Http\Requests\SchemaRequest;
 
 class SchemaController extends Controller
 {
@@ -51,7 +51,7 @@ class SchemaController extends Controller
                     $syncSchemas[] = $data['id'];
                 }
             }
-            $schema->schemas->sync($syncSchemas);
+            $schema->schemas()->sync($syncSchemas);
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ximdex\StructuredData\Requests;
+namespace Ximdex\StructuredData\Http\Requests;
 
 use Illuminate\Validation\Rule;
 use Ximdex\StructuredData\Models\Schema;

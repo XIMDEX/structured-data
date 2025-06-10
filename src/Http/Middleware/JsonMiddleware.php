@@ -1,6 +1,6 @@
 <?php
 
-namespace Ximdex\StructuredData\Middleware;
+namespace Ximdex\StructuredData\Http\Middleware;
 
 use Closure;
 

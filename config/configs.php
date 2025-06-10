@@ -5,6 +5,6 @@ return [
         'name' => 'strdata'
     ],
     'api' => require_once('config-api.php'),
-    'controllersNamespace' => 'Ximdex\StructuredData\Controllers',
+    'controllersNamespace' => 'Ximdex\StructuredData\Http\Controller',
     'modelsNamespace' => 'Ximdex\StructuredData\Models'
 ];

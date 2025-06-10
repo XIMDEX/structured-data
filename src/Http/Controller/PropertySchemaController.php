@@ -1,10 +1,10 @@
 <?php   
 
-namespace Ximdex\StructuredData\Controllers;
+namespace Ximdex\StructuredData\Http\Controller;
 
 use Illuminate\Support\Facades\DB;
 use Ximdex\StructuredData\Models\PropertySchema;
-use Ximdex\StructuredData\Requests\PropertySchemaRequest;
+use Ximdex\StructuredData\Http\Requests\PropertySchemaRequest;
 
 class PropertySchemaController extends Controller
 {
