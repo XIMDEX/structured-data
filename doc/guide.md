@@ -37,20 +37,25 @@ This document provides the installation process information and the API usage.
 ## Installation procedure
 
 First you need an instance of Laravel project in order to use this package. It can be downloaded from the Github repository located in https://github.com/laravel/laravel.
+You can also use [Composer](https://getcomposer.org/download/) to create it via command:
 
-Run composer to require our extension under your Laravel directory:
+```shell
+composer create-project laravel/laravel .
+```
+
+Next, run composer to require our extension under your Laravel directory:
 
 ```shell
 composer require ximdex/structured-data
 ```
 
-This command installs the package in vendor extension.
+This command installs the package in vendor folder.
 
 Before continuing, you have to configure the database properly in your Laravel project in your .evn file in the root directory. For example:
 
 ![database](images/01-database.png)
 
-The next step is the database generation, so is needed to run the migration process for Laravel using the appropriate command for this purpose:
+The next step is the database generation. You need to run the migration process using the command for this purpose:
 
 ```shell
 php artisan migrate
@@ -60,7 +65,7 @@ After this operation we have created the database tables in our project with the
 
 ## Basic usage example
 
-So at this time we are able to consume the API operations to manage the schemas and items data.
+At this time we are able to consume the API operations to manage the schemas and items data.
 
 We assume in this manual that the host for our Laravel instance is under a host named localhost and it's being served. Otherwise we would need to add the rest of the folder hierarchy. For example, for a Laravel project in a folder called <i>structured-data</i>:
 
@@ -84,7 +89,7 @@ To import a schema definitions URL provided by schema.org you can run this conso
 php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld
 ```
 
-> This command only support schemas.org definitions in JSON+LD format.
+> This command only supports schemas.org definitions in JSON+LD format.
 
 <!--If the given URL does not contain the schema definitions version you can provide by another argument:-->
 
@@ -95,16 +100,16 @@ Currently, Schema.org just serves the lastest version, but for legacy purposes y
 php artisan schemas:import https://schema.org/version/latest/schemaorg-current-http.jsonld 29.2
 ```
 
-If no argument is provided, the version will be labeled as 'Latest'.
+If no argument is provided, the version will be internally labeled as 'Latest'.
 
 > If there is any schema definition created by a previous importation or by any user, this information will be updated to the new version and only the absent definitions will be marked as obsolete.
 > However we can still use this deprecated information later.
  
 Also it's possible to perform this import using the following endpoint:
 
-> [GET] http://localhost/api/v1/schemas-import?url=https://schema.org/version/latest/schema.jsonld
+> [GET] http://localhost/api/v1/schemas-import?url=https://schema.org/version/latest/schemaorg-current-http.jsonld
 
-> We recommend to import always the latest version of the entire definitions from http://schema.org/version/latest/all-layers.jsonld resource. Visit http://schema.org for more details.
+> Visit http://schema.org for more details.
 
 ### Schema operations
 
@@ -169,6 +174,8 @@ The result of this request will be a JSON object containing the definition of a 
     ]
 }
 ```
+
+> Note: the properties are simplified to just 1 to serve as example due to the bigger amount of them available.
 
 We can see all the properties and their available types for the *Person* type and their inherited schemas listed in the "schemas" node. In this example, some of the properties come from the *Thing* schema.
 
@@ -349,7 +356,7 @@ Now we have created a type text and Person for this relationship:
 }
 ```
 
-Sometimes you want to create a new property instead of using an existing one. It is possible to send a property name and an optional comment to create both the property and the relationship to the specified schema.
+Sometimes we want to create a new property instead of using an existing one. It is possible to send a property name and an optional comment to create both the property and the relationship to the specified schema.
 
 For example:
 
@@ -436,7 +443,7 @@ Remember that the old types **will be deleted**.
 
 ### Property types manipulation
 
-Often, you need to change a type or add a new one to a property in a schema. If you don't want to specify all the types in the property update operation, to change the desired ones, it's possible to add or update separately.
+Often, we need to change a type or add a new one to a property in a schema. If you don't want to specify all the types in the property update operation, to change the desired ones, it's possible to add or update separately.
 
 #### Type creation
 
@@ -672,7 +679,7 @@ The rest of the required data is the values for the properties to create the con
 
 #### Item creation
 
-So, if you want to create a new item based on the *Person* schema with a minimal amount of data (name and email), the request will be the following:
+If you want to create a new item based on the *Person* schema with a minimal amount of data (name and email), the request will be the following:
 
 > [POST] http://localhost/api/v1/item
 ```json
