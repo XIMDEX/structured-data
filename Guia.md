@@ -1992,4 +1992,3 @@ Daniel Domínguez @daniel423615.
 
 Fernando Quintero Gómez [@Quintero4] (https://github.com/Quintero4)
 
->>>>>>> df47be4aae923edcda5bd311132e9d6fc578b683
